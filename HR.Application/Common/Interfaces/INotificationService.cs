@@ -1,4 +1,4 @@
-﻿using HR.Domain.Entities;
+using HR.Domain.Entities;
 using HR.Domain.Enums;
 
 namespace HR.Application.Common.Interfaces
@@ -24,6 +24,6 @@ namespace HR.Application.Common.Interfaces
             DateTime weekStart,
             DateTime weekEnd);
 
-        Task NotifyMissingHRAsync(int userId);
+        Task NotifyMissingFingerprintAsync(int userId);
     }
 }

@@ -3,6 +3,7 @@ using System;
 using HR.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HR.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260720182835_AddBonusRequests")]
+    partial class AddBonusRequests
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,7 +123,7 @@ namespace HR.Infrastructure.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 7, 20, 18, 47, 35, 434, DateTimeKind.Utc).AddTicks(4058),
+                            CreatedAt = new DateTime(2026, 7, 20, 18, 28, 35, 125, DateTimeKind.Utc).AddTicks(4322),
                             EndTime = new TimeSpan(0, 16, 0, 0, 0),
                             IsDeleted = false,
                             Name = "Normal Shift",
@@ -710,7 +713,7 @@ namespace HR.Infrastructure.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 7, 20, 18, 47, 35, 434, DateTimeKind.Utc).AddTicks(3734),
+                            CreatedAt = new DateTime(2026, 7, 20, 18, 28, 35, 125, DateTimeKind.Utc).AddTicks(4101),
                             Description = "Default work start time",
                             Key = "workDayStart",
                             Section = "Work",
@@ -719,7 +722,7 @@ namespace HR.Infrastructure.Migrations
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2026, 7, 20, 18, 47, 35, 434, DateTimeKind.Utc).AddTicks(3739),
+                            CreatedAt = new DateTime(2026, 7, 20, 18, 28, 35, 125, DateTimeKind.Utc).AddTicks(4105),
                             Description = "Default work end time",
                             Key = "workDayEnd",
                             Section = "Work",
@@ -728,7 +731,7 @@ namespace HR.Infrastructure.Migrations
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2026, 7, 20, 18, 47, 35, 434, DateTimeKind.Utc).AddTicks(3742),
+                            CreatedAt = new DateTime(2026, 7, 20, 18, 28, 35, 125, DateTimeKind.Utc).AddTicks(4108),
                             Description = "Required daily work hours",
                             Key = "requiredDailyHours",
                             Section = "Work",
@@ -737,7 +740,7 @@ namespace HR.Infrastructure.Migrations
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2026, 7, 20, 18, 47, 35, 434, DateTimeKind.Utc).AddTicks(3744),
+                            CreatedAt = new DateTime(2026, 7, 20, 18, 28, 35, 125, DateTimeKind.Utc).AddTicks(4109),
                             Description = "Default working days per month",
                             Key = "workingDaysPerMonth",
                             Section = "Work",
@@ -746,7 +749,7 @@ namespace HR.Infrastructure.Migrations
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2026, 7, 20, 18, 47, 35, 434, DateTimeKind.Utc).AddTicks(3745),
+                            CreatedAt = new DateTime(2026, 7, 20, 18, 28, 35, 125, DateTimeKind.Utc).AddTicks(4110),
                             Description = "Default allowed monthly leave days",
                             Key = "allowedMonthlyLeaveDays",
                             Section = "Work",
@@ -755,7 +758,7 @@ namespace HR.Infrastructure.Migrations
                         new
                         {
                             Id = 6,
-                            CreatedAt = new DateTime(2026, 7, 20, 18, 47, 35, 434, DateTimeKind.Utc).AddTicks(3747),
+                            CreatedAt = new DateTime(2026, 7, 20, 18, 28, 35, 125, DateTimeKind.Utc).AddTicks(4112),
                             Description = "Default allowed monthly leave hours",
                             Key = "allowedMonthlyLeaveHours",
                             Section = "Work",
@@ -764,7 +767,7 @@ namespace HR.Infrastructure.Migrations
                         new
                         {
                             Id = 7,
-                            CreatedAt = new DateTime(2026, 7, 20, 18, 47, 35, 434, DateTimeKind.Utc).AddTicks(3749),
+                            CreatedAt = new DateTime(2026, 7, 20, 18, 28, 35, 125, DateTimeKind.Utc).AddTicks(4113),
                             Description = "Default allowed yearly sick leave days",
                             Key = "allowedSickLeaveDays",
                             Section = "Work",
@@ -773,7 +776,7 @@ namespace HR.Infrastructure.Migrations
                         new
                         {
                             Id = 8,
-                            CreatedAt = new DateTime(2026, 7, 20, 18, 47, 35, 434, DateTimeKind.Utc).AddTicks(3751),
+                            CreatedAt = new DateTime(2026, 7, 20, 18, 28, 35, 125, DateTimeKind.Utc).AddTicks(4115),
                             Description = "First day of week (0=Sunday, 6=Saturday)",
                             Key = "firstDayOfWeek",
                             Section = "Work",
@@ -917,8 +920,8 @@ namespace HR.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("MaritalStatus")
-                        .HasColumnType("integer");
+                    b.Property<string>("MaritalStatus")
+                        .HasColumnType("text");
 
                     b.Property<string>("MotherName")
                         .HasColumnType("text");

@@ -324,5 +324,22 @@ namespace HR.WebApi.Controllers
             if (result.Success) return Ok(new { success = true, Message = result.Message });
             return BadRequest(new { success = false, message = result.Message });
         }
+
+        /// <summary>
+        /// Exports raw attendance logs (fingerprints and mobile punches) to an Excel spreadsheet.
+        /// </summary>
+        [Authorize(Roles = "Admin,HR")]
+        [HttpGet("export")]
+        public async Task<IActionResult> ExportAttendanceLogs(
+            [FromQuery] int? userId,
+            [FromQuery] string? deviceIp,
+            [FromQuery] DateTime? dateFrom,
+            [FromQuery] DateTime? dateTo,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new HR.Application.Attendance.ZKPython.Logs.Queries.ExportAttendanceLogsQuery(userId, deviceIp, dateFrom, dateTo);
+            var result = await _mediator.Send(query, cancellationToken);
+            return File(result.Data, result.ContentType, result.FileName);
+        }
     }
 }

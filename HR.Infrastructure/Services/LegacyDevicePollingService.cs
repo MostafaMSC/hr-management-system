@@ -1,4 +1,4 @@
-﻿using HR.Application.Attendance.Commands;
+using HR.Application.Attendance.Commands;
 using HR.Application.Common.Interfaces;
 using HR.Domain.Entities;
 using MediatR;
@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HR.Infrastructure.Services;
 
-public class LegacyDevicePollingService : BackgroundService
+public class LegacyDevicePollingService : Microsoft.Extensions.Hosting.BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<LegacyDevicePollingService> _logger;

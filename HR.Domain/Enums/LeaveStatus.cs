@@ -7,5 +7,6 @@ public enum LeaveStatus
     Rejected = 2,
     Cancelled = 3,
     AwaitingManagerApproval = 4,
-    AwaitingHRApproval = 5
+    AwaitingHRApproval = 5,
+    AwaitingSecondLineApproval = 6
 }

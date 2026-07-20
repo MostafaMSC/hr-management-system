@@ -7,7 +7,7 @@ using Serilog;
 using Serilog.Exceptions;
 using HR.WebApi.Middleware;
 using HR.WebApi.Converters;
-using HR.WebApi.Hubs;
+using HR.Infrastructure.Hubs;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Text.Json;

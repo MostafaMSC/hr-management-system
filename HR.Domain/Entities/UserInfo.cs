@@ -60,6 +60,16 @@ public class UserInfo : BaseEntity, ISoftDelete
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
+    // Bonus Requests Navigation
+    [InverseProperty(nameof(BonusRequest.RequestingManager))]
+    public ICollection<BonusRequest> RequestedBonuses { get; set; } = new List<BonusRequest>();
+
+    [InverseProperty(nameof(BonusRequest.TargetUser))]
+    public ICollection<BonusRequest> ReceivedBonuses { get; set; } = new List<BonusRequest>();
+
+    [InverseProperty(nameof(BonusRequest.ProcessedByHr))]
+    public ICollection<BonusRequest> ProcessedBonuses { get; set; } = new List<BonusRequest>();
+
     // Extended Profile Information
     public string? FullNameArabic { get; set; }
     public string? MotherName { get; set; }
@@ -77,7 +87,7 @@ public class UserInfo : BaseEntity, ISoftDelete
     public int? SecondLineManagerId { get; set; }
     [ForeignKey("SecondLineManagerId")]
     public UserInfo? SecondLineManager { get; set; }
-    public string? MaritalStatus { get; set; } = "Single";
+    public HR.Domain.Enums.MaritalStatus? MaritalStatus { get; set; } = HR.Domain.Enums.MaritalStatus.Single;
     public string? City { get; set; }
     public string? EmergencyContactPhone { get; set; }
     public string? EmergencyContactRelation { get; set; }

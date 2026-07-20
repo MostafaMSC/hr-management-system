@@ -18,6 +18,9 @@ public class SettingsController : ControllerBase
         _mediator = mediator;
     }
 
+    /// <summary>
+    /// Retrieves global work settings.
+    /// </summary>
     [HttpGet("work-settings")]
     public async Task<IActionResult> GetWorkSettings(CancellationToken cancellationToken)
     {
@@ -25,6 +28,9 @@ public class SettingsController : ControllerBase
         return Ok(settings);
     }
 
+    /// <summary>
+    /// Updates global work settings.
+    /// </summary>
     [Authorize(Policy = "AdminPolicy")]
     [HttpPut("work-settings")]
     public async Task<IActionResult> UpdateWorkSettings([FromBody] Dictionary<string, object> settings, CancellationToken cancellationToken)

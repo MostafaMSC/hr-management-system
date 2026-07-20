@@ -5,6 +5,12 @@ namespace HR.Domain.Enums
         LeaveStatusChanged,
         WeeklyReportSent,
         MissingFingerprint,
-        Holiday
+        Holiday,
+        SystemAlert,
+        Announcement,
+        Salary,
+        Custom,
+        RequestPending,
+        RequestRejected
     }
 }

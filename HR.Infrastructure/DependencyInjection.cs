@@ -19,6 +19,8 @@ public static class DependencyInjection
 
         // Register Background Services
         services.AddHostedService<HR.Infrastructure.Services.LegacyDevicePollingService>();
+        services.AddHostedService<HR.Infrastructure.BackgroundService.DailyFingerprintCheckService>();
+        services.AddHostedService<HR.Infrastructure.BackgroundService.WeeklyEmailReportService>();
 
         // Register other services here (ZKTecoService, EmailService)
         services.AddTransient<IReportExportService, HR.Infrastructure.Services.ReportExportService>();

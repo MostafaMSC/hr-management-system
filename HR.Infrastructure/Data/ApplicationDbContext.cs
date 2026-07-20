@@ -28,6 +28,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public DbSet<Fingerprint> Fingerprints => Set<Fingerprint>();
 
+    public DbSet<BonusRequest> BonusRequests => Set<BonusRequest>();
+
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
         foreach (var entry in ChangeTracker.Entries<HR.Domain.Common.ISoftDelete>())
@@ -146,6 +148,27 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         builder.Entity<DailyAttendanceSummary>()
             .HasIndex(das => new { das.UserInfoId, das.Date })
             .IsUnique();
+
+
+        builder.Entity<BonusRequest>(entity =>
+        {
+            entity.HasOne(e => e.RequestingManager)
+                  .WithMany(u => u.RequestedBonuses)
+                  .HasForeignKey(e => e.RequestingManagerId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.TargetUser)
+                  .WithMany(u => u.ReceivedBonuses)
+                  .HasForeignKey(e => e.TargetUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.ProcessedByHr)
+                  .WithMany(u => u.ProcessedBonuses)
+                  .HasForeignKey(e => e.ProcessedByHrId)
+                  .OnDelete(DeleteBehavior.Restrict);
+                  
+            entity.HasQueryFilter(e => !e.IsDeleted);
+        });
 
         // LeaveRequest relationships
         builder.Entity<LeaveRequest>()

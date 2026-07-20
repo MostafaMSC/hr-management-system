@@ -18,6 +18,9 @@ public class SectionsController : ControllerBase
         _mediator = mediator;
     }
 
+    /// <summary>
+    /// Retrieves all sections, optionally filtered by department.
+    /// </summary>
     [AllowAnonymous]
     [HttpGet]
     [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "departmentId" })]
@@ -27,6 +30,9 @@ public class SectionsController : ControllerBase
         return Ok(sections);
     }
 
+    /// <summary>
+    /// Retrieves a specific section by its ID.
+    /// </summary>
     [HttpGet("{id}")]
     [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any)]
     public async Task<IActionResult> GetSectionById(int id)
@@ -39,6 +45,9 @@ public class SectionsController : ControllerBase
         return Ok(section);
     }
 
+    /// <summary>
+    /// Creates a new section.
+    /// </summary>
     [HttpPost]
     public async Task<IActionResult> CreateSection([FromBody] CreateSectionCommand command)
     {
@@ -53,6 +62,9 @@ public class SectionsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Updates an existing section.
+    /// </summary>
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateSection(int id, [FromBody] UpdateSectionRequest request)
     {
@@ -72,6 +84,9 @@ public class SectionsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Deletes a section by its ID.
+    /// </summary>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteSection(int id)
     {

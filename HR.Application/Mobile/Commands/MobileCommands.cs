@@ -124,7 +124,7 @@ public class MobileCommandsHandler :
             ReportToId = user.ReportToId,
             SecondLineManagerId = user.SecondLineManagerId,
             SecondLineManagerName = user.SecondLineManager != null ? $"{user.SecondLineManager.FirstName} {user.SecondLineManager.LastName}" : null,
-            MaritalStatus = user.MaritalStatus,
+            MaritalStatus = user.MaritalStatus?.ToString(),
             City = user.City,
             EmergencyContactPhone = user.EmergencyContactPhone,
             EmergencyContactRelation = user.EmergencyContactRelation,

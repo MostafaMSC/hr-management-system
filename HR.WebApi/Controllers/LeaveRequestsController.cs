@@ -26,6 +26,9 @@ public class LeaveRequestsController : ControllerBase
         _mediator = mediator;
     }
 
+    /// <summary>
+    /// Creates a new leave request with an optional file attachment.
+    /// </summary>
     [HttpPost]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> CreateLeaveRequest([FromForm] CreateLeaveRequestApiDto dto, IFormFile? attachment = null)
@@ -101,6 +104,9 @@ public class LeaveRequestsController : ControllerBase
         catch (Exception ex) { return StatusCode(500, $"Internal server error: {ex.Message}"); }
     }
 
+    /// <summary>
+    /// Retrieves all leave requests for the currently logged-in employee.
+    /// </summary>
     [HttpGet("my-requests")]
     public async Task<IActionResult> GetMyLeaveRequests([FromQuery] LeaveStatus? leaveStatus = null, [FromQuery] int? pageNumber = null, [FromQuery] int? pageSize = null)
     {
@@ -113,6 +119,9 @@ public class LeaveRequestsController : ControllerBase
         return Ok(requests);
     }
 
+    /// <summary>
+    /// Retrieves a specific leave request by its ID.
+    /// </summary>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetLeaveRequestById(int id)
     {
@@ -121,6 +130,9 @@ public class LeaveRequestsController : ControllerBase
         return Ok(request);
     }
 
+    /// <summary>
+    /// Retrieves leave requests submitted by employees within the manager's department.
+    /// </summary>
     [HttpGet("department-requests")]
     [Authorize(Roles = "Manager,Administrator,HR")]
     public async Task<IActionResult> GetDepartmentRequests([FromQuery] LeaveStatus? status = null, [FromQuery] int? pageNumber = null, [FromQuery] int? pageSize = null)
@@ -134,6 +146,9 @@ public class LeaveRequestsController : ControllerBase
         return Ok(requests);
     }
 
+    /// <summary>
+    /// Retrieves leave requests that are awaiting final HR approval.
+    /// </summary>
     [HttpGet("hr-approvals")]
     [Authorize(Roles = "Administrator,HR")]
     public async Task<IActionResult> GetHRApprovals([FromQuery] LeaveStatus? status = null, [FromQuery] int? pageNumber = null, [FromQuery] int? pageSize = null)
@@ -148,6 +163,9 @@ public class LeaveRequestsController : ControllerBase
         return Ok(requests);
     }
 
+    /// <summary>
+    /// Approves a leave request as a Manager.
+    /// </summary>
     [HttpPut("{id}/approve-manager")]
     [Authorize(Roles = "Manager,Administrator,HR")]
     public async Task<IActionResult> ApproveLeaveByManager(int id, [FromBody] LeaveApproveRejectDto dto)
@@ -160,6 +178,9 @@ public class LeaveRequestsController : ControllerBase
         catch (Exception ex) { return BadRequest(ex.Message); }
     }
 
+    /// <summary>
+    /// Rejects a leave request as a Manager.
+    /// </summary>
     [HttpPut("{id}/reject-manager")]
     [Authorize(Roles = "Manager,Administrator,HR")]
     public async Task<IActionResult> RejectLeaveByManager(int id, [FromBody] LeaveApproveRejectDto dto)
@@ -172,6 +193,9 @@ public class LeaveRequestsController : ControllerBase
         catch (Exception ex) { return BadRequest(ex.Message); }
     }
 
+    /// <summary>
+    /// Approves a leave request as HR.
+    /// </summary>
     [HttpPut("{id}/approve-hr")]
     [Authorize(Roles = "Administrator,HR")]
     public async Task<IActionResult> ApproveLeaveByHR(int id, [FromBody] LeaveApproveRejectDto dto)
@@ -184,6 +208,9 @@ public class LeaveRequestsController : ControllerBase
         catch (Exception ex) { return BadRequest(ex.Message); }
     }
 
+    /// <summary>
+    /// Rejects a leave request as HR.
+    /// </summary>
     [HttpPut("{id}/reject-hr")]
     [Authorize(Roles = "Administrator,HR")]
     public async Task<IActionResult> RejectLeaveByHR(int id, [FromBody] LeaveApproveRejectDto dto)
@@ -196,6 +223,9 @@ public class LeaveRequestsController : ControllerBase
         catch (Exception ex) { return BadRequest(ex.Message); }
     }
 
+    /// <summary>
+    /// Retrieves the current leave balance for the logged-in employee.
+    /// </summary>
     [HttpGet("balance")]
     public async Task<IActionResult> GetLeaveBalance()
     {
@@ -203,6 +233,9 @@ public class LeaveRequestsController : ControllerBase
         return Ok(balance);
     }
 
+    /// <summary>
+    /// Converts approved overtime hours into regular leave balance.
+    /// </summary>
     [HttpPost("convert-overtime")]
     public async Task<IActionResult> ConvertOvertime([FromBody] ConvertOvertimeDto dto)
     {
@@ -214,6 +247,9 @@ public class LeaveRequestsController : ControllerBase
         catch (Exception ex) { return BadRequest(ex.Message); }
     }
 
+    /// <summary>
+    /// Uploads a file attachment to an existing leave request.
+    /// </summary>
     [HttpPost("{id}/upload-attachment")]
     public async Task<IActionResult> UploadAttachment(int id, IFormFile file)
     {
@@ -248,5 +284,22 @@ public class LeaveRequestsController : ControllerBase
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             throw new UnauthorizedAccessException("User ID not found in token");
         return userId;
+    }
+
+    /// <summary>
+    /// Exports leave requests to an Excel spreadsheet.
+    /// </summary>
+    [Authorize(Roles = "Admin,HR")]
+    [HttpGet("export")]
+    public async Task<IActionResult> ExportLeaveRequests(
+        [FromQuery] int? userId,
+        [FromQuery] DateTime? dateFrom,
+        [FromQuery] DateTime? dateTo,
+        [FromQuery] HR.Domain.Enums.LeaveStatus? status,
+        CancellationToken cancellationToken)
+    {
+        var query = new HR.Application.Leaves.Queries.ExportLeaveRequestsQuery(userId, dateFrom, dateTo, status);
+        var result = await _mediator.Send(query, cancellationToken);
+        return File(result.Data, result.ContentType, result.FileName);
     }
 }

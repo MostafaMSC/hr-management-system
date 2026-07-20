@@ -11,6 +11,11 @@ namespace HR.Domain.Enums
         Bereavement,
         Maternity,
         Hajj,
-        Paternity
+        Paternity,
+        EmergencyDelay,
+        Mission,
+        WorkFromHome,
+        Overtime,
+        Unpaid
     }
 }

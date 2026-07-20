@@ -18,7 +18,7 @@ namespace HR.Infrastructure.Services
             _configuration = configuration;
         }
 
-        public string GenerateAccessToken(UserInfo user)
+        public string GenerateAccessToken(UserInfo user, double? customExpiryMinutes = null)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings["Secret"] ?? "default_secret_key_needs_to_be_long_enough!";
@@ -33,7 +33,7 @@ namespace HR.Infrastructure.Services
             };
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpiryMinutes"] ?? "60"));
+            var expires = DateTime.UtcNow.AddMinutes(customExpiryMinutes ?? Convert.ToDouble(jwtSettings["ExpiryMinutes"] ?? "60"));
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],

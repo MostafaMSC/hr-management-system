@@ -69,7 +69,7 @@ public class SetupTotpResponse
 }
 
 // --- Commands ---
-public record LoginCommand(string Username, string Password) : IRequest<AuthResponse>;
+public record LoginCommand(string Username, string Password, double? ExpiryMinutes = null) : IRequest<AuthResponse>;
 
 public class RegisterCommand : IRequest<bool>
 {
@@ -132,7 +132,7 @@ public class AuthCommandsHandler :
             return new AuthResponse(null, null, null, true, user.Id, user.TwoFactorType);
         }
 
-        var accessToken = _tokenService.GenerateAccessToken(user);
+        var accessToken = _tokenService.GenerateAccessToken(user, request.ExpiryMinutes);
         var refreshToken = _tokenService.GenerateRefreshToken(user.Id);
 
         _context.RefreshTokens.Add(refreshToken);
@@ -171,7 +171,7 @@ public class AuthCommandsHandler :
             ReportToId = user.ReportToId,
             SecondLineManagerId = user.SecondLineManagerId,
             SecondLineManagerName = user.SecondLineManager != null ? $"{user.SecondLineManager.FirstName} {user.SecondLineManager.LastName}" : null,
-            MaritalStatus = user.MaritalStatus,
+            MaritalStatus = user.MaritalStatus?.ToString(),
             City = user.City,
             EmergencyContactPhone = user.EmergencyContactPhone,
             EmergencyContactRelation = user.EmergencyContactRelation,
@@ -293,7 +293,7 @@ public class AuthCommandsHandler :
             ReportToId = user.ReportToId,
             SecondLineManagerId = user.SecondLineManagerId,
             SecondLineManagerName = user.SecondLineManager != null ? $"{user.SecondLineManager.FirstName} {user.SecondLineManager.LastName}" : null,
-            MaritalStatus = user.MaritalStatus,
+            MaritalStatus = user.MaritalStatus?.ToString(),
             City = user.City,
             EmergencyContactPhone = user.EmergencyContactPhone,
             EmergencyContactRelation = user.EmergencyContactRelation,

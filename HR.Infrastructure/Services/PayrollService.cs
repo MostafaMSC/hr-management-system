@@ -43,6 +43,14 @@ namespace HR.Infrastructure.Services
             var users = await _context.UserInfos.ToListAsync(cancellationToken);
             _logger.LogInformation("📋 Preview: {UserCount} users in DB", users.Count);
 
+            int currentYear = DateTime.UtcNow.Year;
+            int currentMonth = DateTime.UtcNow.Month;
+            var approvedBonuses = await _context.BonusRequests
+                .Where(b => b.Status == HR.Domain.Enums.BonusStatus.Approved 
+                         && b.Year == currentYear 
+                         && b.Month == currentMonth)
+                .ToListAsync(cancellationToken);
+
             // Data starts at row after the header row
             var dataStartRow = cols.HeaderRow + 1;
             var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? 0;
@@ -92,6 +100,37 @@ namespace HR.Infrastructure.Services
                         Email = matchedUser.Email ?? ""
                     };
                     dto.MatchType = matchType;
+
+                    // ── Inject Approved Bonuses ──
+                    var userBonuses = approvedBonuses.Where(b => b.TargetUserId == matchedUser.Id).ToList();
+                    if (userBonuses.Any())
+                    {
+                        decimal currentBonus = 0;
+                        decimal.TryParse(dto.Bonus, out currentBonus);
+                        
+                        decimal gross = 0;
+                        decimal.TryParse(dto.GrossSalary, out gross);
+                        
+                        decimal addedBonus = 0;
+                        foreach (var b in userBonuses)
+                        {
+                            if (b.Type == HR.Domain.Enums.BonusType.Amount)
+                                addedBonus += b.Value;
+                            else if (b.Type == HR.Domain.Enums.BonusType.Percentage)
+                                addedBonus += gross * (b.Value / 100m);
+                        }
+
+                        currentBonus += addedBonus;
+                        dto.Bonus = currentBonus.ToString("0.##"); // Keep format simple
+                        
+                        // Update Net Salary accordingly
+                        decimal currentNet = 0;
+                        if (decimal.TryParse(dto.NetSalary, out currentNet))
+                        {
+                            currentNet += addedBonus;
+                            dto.NetSalary = currentNet.ToString("0.##");
+                        }
+                    }
                 }
 
                 matches.Add(dto);

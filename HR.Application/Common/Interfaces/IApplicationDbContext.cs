@@ -1,4 +1,4 @@
-﻿using HR.Domain.Entities;
+using HR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace HR.Application.Common.Interfaces;
@@ -19,6 +19,7 @@ public interface IApplicationDbContext
     DbSet<DailyAttendanceSummary> DailyAttendanceSummaries { get; }
     DbSet<RefreshToken> RefreshTokens { get; }
     DbSet<Notification> Notifications { get; }
+    DbSet<BonusRequest> BonusRequests { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

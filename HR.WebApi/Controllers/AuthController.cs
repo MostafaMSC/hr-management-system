@@ -76,6 +76,37 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// TEST ONLY: Generates a short-lived access token to test frontend expiration and refresh flows.
+    /// </summary>
+    [HttpPost("login-short-token")]
+    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> LoginShortToken([FromBody] LoginCommand command, [FromQuery] double expiryMinutes = 1, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var cmdWithExpiry = command with { ExpiryMinutes = expiryMinutes };
+            var response = await _mediator.Send(cmdWithExpiry, cancellationToken);
+
+            if (!response.Requires2FA && response.AccessToken != null && response.RefreshToken != null)
+            {
+                SetTokenCookie(response.AccessToken, response.RefreshToken);
+            }
+
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during test login");
+            return StatusCode(500, new { message = "An error occurred during test login" });
+        }
+    }
+
+    /// <summary>
     /// Verifies the OTP for 2FA login.
     /// </summary>
     [HttpPost("verify-otp")]
@@ -276,5 +307,16 @@ public class AuthController : ControllerBase
         };
         Response.Cookies.Append("accessToken", token, cookieOptions);
         Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+    }
+
+    /// <summary>
+    /// Exports all users to an Excel spreadsheet.
+    /// </summary>
+    [Authorize(Roles = "Admin,HR")]
+    [HttpGet("export")]
+    public async Task<IActionResult> ExportUsers(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new HR.Application.Auth.Queries.ExportUsersQuery(), cancellationToken);
+        return File(result.Data, result.ContentType, result.FileName);
     }
 }
