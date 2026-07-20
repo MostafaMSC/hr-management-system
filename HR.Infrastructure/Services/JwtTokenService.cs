@@ -18,7 +18,7 @@ public class JwtTokenService : ITokenService
         _configuration = configuration;
     }
 
-    public string GenerateAccessToken(UserInfo user)
+    public string GenerateAccessToken(UserInfo user, double? customExpiryMinutes = null)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var secretKey = jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret is missing.");
@@ -44,7 +44,7 @@ public class JwtTokenService : ITokenService
             issuer: issuer,
             audience: audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
+            expires: DateTime.UtcNow.AddMinutes(customExpiryMinutes ?? expiryMinutes),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
