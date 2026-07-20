@@ -48,6 +48,52 @@ The backend pushes real-time events to the frontend via SignalR.
 - **Authorization Header:** All protected endpoints require the header: `Authorization: Bearer <Your_Access_Token>`
 - **Response Wrapping:** Most listing endpoints return arrays directly, but paginated endpoints may return an object containing `data`, `pageNumber`, `pageSize`, and `totalRecords`.
 
+## 🚀 System Features Overview
+
+The UI needs to support the following business features and workflows:
+
+### 1. Authentication & Employee Profiles
+- **Login & Tokens:** Standard login, short-lived token testing, and silent refresh token flows.
+- **2FA:** Support for Two-Factor Authentication via OTP.
+- **Profiles:** Detailed employee profiles (Name, Job Title, Hierarchy, Photo, Personal Details).
+
+### 2. Leave Management (Time Off)
+- **Requesting Leaves:** Employees can request different leave types (Hourly, Sick, Personal, etc.) and upload attachments (e.g., medical notes).
+- **Approval Workflow:** Multi-tier approval system (Direct Manager → HR).
+- **Balances:** Real-time visibility of taken vs. available leave balances.
+- **Overtime Conversion:** Converting accrued overtime hours into regular leave balance.
+
+### 3. Attendance & Biometric Tracking
+- **Punch Logs:** Viewing raw clock-in/clock-out data synchronized from hardware fingerprint/face devices.
+- **Daily Summaries:** Daily evaluations marking employees as On-Time, Late, Absent, or having incomplete punches.
+- **Shifts:** Managing organizational shifts (Start/End times, grace periods) and assigning them to users.
+
+### 4. Payroll Automation
+- **Salary Processing:** HR can upload Excel payroll sheets.
+- **Email Distribution:** The system automatically parses the Excel sheet and emails individual PDF salary slips to employees.
+- **HR Master Copy:** Generating a combined multi-page PDF of all salary slips, filtered by department.
+
+### 5. Bonuses & Penalties
+- **Financial Requests:** Requesting monetary bonuses or penalties for employees.
+- **Workflow:** Status tracking (Pending, Approved, Rejected) via Manager and Admin approvals.
+
+### 6. Organizational Structure
+- **Hierarchy:** Managing Departments and Sections.
+- **Reporting Lines:** Assigning Direct Managers and Second-Line Managers to employees.
+
+### 7. Internal Ticketing System (Helpdesk)
+- **Support Tickets:** Employees can open support tickets with priority levels and file attachments.
+- **Tracking:** Managers/HR can update ticket statuses (Pending, In Progress, Resolved) and add comments.
+
+### 8. Global Settings & Holidays
+- **Work Settings:** Defining global weekend days and standard organizational rules.
+- **Holidays:** Managing the calendar of public and company-wide holidays.
+
+### 9. Real-Time Communications
+- **WebSockets:** In-app real-time notifications via SignalR (e.g., "Your leave was approved!").
+- **Push Notifications:** Firebase Cloud Messaging (FCM) integration for mobile alerts.
+- **Emails:** Automated weekly summary emails.
+
 ## 🗂️ Core Modules
 
 Here is a high-level overview of the main controllers and their purpose:
