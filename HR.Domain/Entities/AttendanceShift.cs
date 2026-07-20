@@ -2,7 +2,7 @@ using HR.Domain.Common;
 
 namespace HR.Domain.Entities;
 
-public class AttendanceShift : BaseEntity
+public class AttendanceShift : BaseEntity, ISoftDelete
 {
     public string Name { get; set; } = string.Empty;
     public TimeSpan StartTime { get; set; }

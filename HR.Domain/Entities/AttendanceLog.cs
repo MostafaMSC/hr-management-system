@@ -14,6 +14,7 @@ public class AttendanceLog : BaseEntity
 
     public int? DeviceId { get; set; }
     public Device? Device { get; set; }
+    public string? DeviceIP { get; set; }
 
     public DateTime PunchTime { get; set; }
     public DateTime Time { get => PunchTime; set => PunchTime = value; }
