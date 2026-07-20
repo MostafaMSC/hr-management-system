@@ -30,7 +30,7 @@ public class CreateTicketRequest
     public DateTime? EndDate { get; set; }
 }
 
-public class UpdateTicketStatusRequest 
+public class UpdateTicketStatusRequest
 {
     public TicketStatus Status { get; set; }
 }

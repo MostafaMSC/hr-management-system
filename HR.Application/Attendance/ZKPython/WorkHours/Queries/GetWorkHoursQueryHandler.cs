@@ -72,8 +72,8 @@ public class GetWorkHoursQueryHandler : IRequestHandler<GetWorkHoursQuery, List<
                     var punchIn = checkIn?.Time ?? dayLogs.First().Time;
                     if (checkOut != null && (checkOut.Time - punchIn).TotalMinutes > 30)
                     {
-                         // They have a checkout, just use the recorded duration
-                         totalHours += (checkOut.Time - punchIn).TotalHours;
+                        // They have a checkout, just use the recorded duration
+                        totalHours += (checkOut.Time - punchIn).TotalHours;
                     }
                     else if (checkOut == null || (checkOut.Time - punchIn).TotalMinutes <= 30)
                     {
@@ -81,7 +81,7 @@ public class GetWorkHoursQueryHandler : IRequestHandler<GetWorkHoursQuery, List<
                         var finishDateTime = todayLocal.Add(finishTimeSpan);
                         var now = DateTime.Now;
                         var endTime = now > finishDateTime ? finishDateTime : now;
-                        
+
                         if (endTime > punchIn)
                         {
                             totalHours += (endTime - punchIn).TotalHours;
@@ -110,7 +110,8 @@ public class GetWorkHoursQueryHandler : IRequestHandler<GetWorkHoursQuery, List<
             return totalHours;
         }
 
-        var result = allUsers.Select(user => {
+        var result = allUsers.Select(user =>
+        {
             var userLogs = allLogs.Where(l => l.UserInfoId == user.Id).ToList();
 
             // Calculate 'TodayHours' separately (always live)
@@ -120,7 +121,7 @@ public class GetWorkHoursQueryHandler : IRequestHandler<GetWorkHoursQuery, List<
             // Weekly and Monthly: include live today so the totals are accurate
             var weekLogs = userLogs.Where(x => x.PunchTime.Date >= startOfWeek && x.PunchTime.Date <= endOfWeek).ToList();
             var weeklyHours = CalculateEnhancedHours(weekLogs, isIncludeLiveToday: true);
-            
+
             var monthlyHours = CalculateEnhancedHours(userLogs, isIncludeLiveToday: true);
 
             double achievementPercent = monthlyRequired > 0 ? (monthlyHours / monthlyRequired) * 100 : 0;

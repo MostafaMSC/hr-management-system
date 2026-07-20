@@ -32,7 +32,7 @@ namespace HR.Application.Attendance.ZKPython.Leaves.Commands
             if (leaveRequest == null)
                 throw new KeyNotFoundException($"Leave request with ID {request.LeaveRequestId} not found.");
 
-            if (leaveRequest.Status != LeaveStatus.Pending )
+            if (leaveRequest.Status != LeaveStatus.Pending)
                 throw new InvalidOperationException("Leave request is not pending manager approval.");
 
             // Verify manager has permission (is manager of employee's department)

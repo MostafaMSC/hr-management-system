@@ -20,8 +20,8 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, UserO
     private readonly ILogger<DeleteUserCommandHandler> _logger;
 
     public DeleteUserCommandHandler(
-        IUserRepository userRepository, 
-        IPythonService pythonService, 
+        IUserRepository userRepository,
+        IPythonService pythonService,
         ILogger<DeleteUserCommandHandler> logger)
     {
         _userRepository = userRepository;

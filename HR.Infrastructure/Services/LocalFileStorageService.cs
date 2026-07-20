@@ -20,7 +20,7 @@ public class LocalFileStorageService : ILocalStorageService
 
         // We store files in wwwroot/uploads/...
         var uploadsFolder = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), subDirectory);
-        
+
         if (!Directory.Exists(uploadsFolder))
             Directory.CreateDirectory(uploadsFolder);
 

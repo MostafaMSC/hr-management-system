@@ -21,7 +21,7 @@ namespace HR.Application.Attendance.ZKPython.Leaves.Queries
 
         public async Task<LeaveRequestResponseDto?> Handle(GetLeaveRequestByIdQuery request, CancellationToken cancellationToken)
         {
-        return null;
+            return null;
+        }
     }
-}
 }

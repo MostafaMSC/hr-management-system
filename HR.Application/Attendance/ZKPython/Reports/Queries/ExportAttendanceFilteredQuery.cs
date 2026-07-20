@@ -44,17 +44,17 @@ public class ExportAttendanceFilteredQueryHandler : IRequestHandler<ExportAttend
         {
             filterDeptId = request.DepartmentId;
         }
-        else if (role == Domain.Enums.UserType.User)
+        else if (role == Domain.Enums.UserType.Employee)
         {
             filterUserId = _currentUserService.UserId;
         }
 
         var stream = _repository.GetAttendanceReportStreamAsync(
-            request.DeviceIp, 
-            dtFrom, 
-            dtTo, 
-            request.Search, 
-            filterUserId, 
+            request.DeviceIp,
+            dtFrom,
+            dtTo,
+            request.Search,
+            filterUserId,
             filterDeptId);
 
         return Task.FromResult(MapStream(stream));
@@ -64,15 +64,15 @@ public class ExportAttendanceFilteredQueryHandler : IRequestHandler<ExportAttend
     {
         await foreach (var x in stream)
         {
-            yield return new AttendanceLogReportResultDto 
+            yield return new AttendanceLogReportResultDto
             {
                 UserID = x.UserID,
                 Name = x.Name,
                 Department = x.Department,
                 Date = x.Date.ToString("yyyy-MM-dd"),
                 CheckIn = x.CheckIn.ToString("HH:mm"),
-                CheckOut = (x.CheckIn == x.CheckOut || (x.CheckOut - x.CheckIn).TotalMinutes < 60) 
-                    ? null 
+                CheckOut = (x.CheckIn == x.CheckOut || (x.CheckOut - x.CheckIn).TotalMinutes < 60)
+                    ? null
                     : x.CheckOut.ToString("HH:mm")
             };
         }

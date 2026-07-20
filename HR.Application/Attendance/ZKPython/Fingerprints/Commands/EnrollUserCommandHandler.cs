@@ -30,10 +30,10 @@ public class EnrollUserCommandHandler : IRequestHandler<EnrollUserCommand, UserO
         try
         {
             var result = await _pythonService.RunPythonEnrollUserAsync(command.DeviceIp, command.UserId, command.FingerId, cancellationToken);
-            
-            return new UserOperationResult 
-            { 
-                Success = result.Success, 
+
+            return new UserOperationResult
+            {
+                Success = result.Success,
                 Message = result.Message,
                 ErrorDetail = result.Success ? null : result.Data
             };

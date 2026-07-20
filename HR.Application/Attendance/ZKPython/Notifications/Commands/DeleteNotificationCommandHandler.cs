@@ -22,7 +22,7 @@ namespace HR.Application.Attendance.ZKPython.Notifications.Commands
         {
             // Get notification to verify ownership
             var notification = await _notificationRepository.GetByIdAsync(request.NotificationId);
-            
+
             if (notification == null)
                 throw new KeyNotFoundException($"Notification with ID {request.NotificationId} not found.");
 

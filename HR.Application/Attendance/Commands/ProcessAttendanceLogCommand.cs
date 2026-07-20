@@ -72,7 +72,7 @@ public class ProcessAttendanceLogCommandHandler : IRequestHandler<ProcessAttenda
             UserInfoId = user.Id,
             TargetDate = newLog.PunchTime.Date
         };
-        
+
         // Use mediator to trigger it. We need to inject IMediator.
         // Wait, since we are inside a MediatR handler, injecting IMediator is fine.
         return true;

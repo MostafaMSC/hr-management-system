@@ -19,6 +19,9 @@ public class MobileController : ControllerBase
         _mediator = mediator;
     }
 
+    /// <summary>
+    /// Authenticates a mobile user.
+    /// </summary>
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthResponse>> Login([FromBody] MobileLoginRequest request)
@@ -28,6 +31,9 @@ public class MobileController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Refreshes the mobile authentication token.
+    /// </summary>
     [HttpPost("refresh")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
@@ -40,6 +46,9 @@ public class MobileController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Logs out the mobile user.
+    /// </summary>
     [Authorize]
     [HttpPost("logout")]
     public IActionResult Logout()
@@ -49,6 +58,9 @@ public class MobileController : ControllerBase
         return Ok(new { message = "تم تسجيل الخروج بنجاح" });
     }
 
+    /// <summary>
+    /// Gets the current authenticated user's details.
+    /// </summary>
     [Authorize]
     [HttpGet("me")]
     public async Task<IActionResult> Me()
@@ -63,6 +75,9 @@ public class MobileController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Verifies the OTP for mobile login.
+    /// </summary>
     [HttpPost("verify-otp")]
     public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request)
     {
@@ -70,6 +85,9 @@ public class MobileController : ControllerBase
         return Ok(new { message = "OTP Verified" });
     }
 
+    /// <summary>
+    /// Updates the Firebase Cloud Messaging (FCM) token for push notifications.
+    /// </summary>
     [HttpPost("update-fcm-token")]
     [Authorize]
     public async Task<ActionResult<bool>> UpdateFcmToken([FromBody] UpdateFcmTokenRequest request)
@@ -82,6 +100,9 @@ public class MobileController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Records a check-in attendance punch.
+    /// </summary>
     [HttpPost("checkin")]
     [Authorize]
     public async Task<ActionResult<bool>> CheckIn([FromBody] MobileAttendanceRequest request)
@@ -94,6 +115,9 @@ public class MobileController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Records a check-out attendance punch.
+    /// </summary>
     [HttpPost("checkout")]
     [Authorize]
     public async Task<ActionResult<bool>> CheckOut([FromBody] MobileAttendanceRequest request)
@@ -106,6 +130,9 @@ public class MobileController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Gets the attendance summary for a specific month.
+    /// </summary>
     [HttpGet("summary")]
     [Authorize]
     public async Task<IActionResult> GetSummary([FromQuery] int? month, [FromQuery] int? year, [FromQuery] int? employeeId)
@@ -119,6 +146,9 @@ public class MobileController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Gets the attendance summary for users in the same department.
+    /// </summary>
     [HttpGet("department-users-summary")]
     [Authorize]
     public async Task<IActionResult> GetDepartmentUsersSummary([FromQuery] int? month, [FromQuery] int? year)
@@ -131,6 +161,9 @@ public class MobileController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Gets daily attendance logs.
+    /// </summary>
     [HttpGet("daily-logs")]
     [Authorize]
     public async Task<IActionResult> GetDailyLogs([FromQuery] int? month, [FromQuery] int? year, [FromQuery] int? employeeId)
@@ -144,6 +177,9 @@ public class MobileController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Gets colleagues in the same department.
+    /// </summary>
     [HttpGet("department-colleagues")]
     [Authorize]
     public async Task<IActionResult> GetDepartmentColleagues()
@@ -156,6 +192,9 @@ public class MobileController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Gets a list of available attendance devices.
+    /// </summary>
     [HttpGet("devices")]
     [Authorize]
     public async Task<IActionResult> GetDevices()
@@ -163,6 +202,9 @@ public class MobileController : ControllerBase
         return Ok(await _mediator.Send(new GetAllDevicesQuery()));
     }
 
+    /// <summary>
+    /// Gets notifications for the user.
+    /// </summary>
     [HttpGet("notifications")]
     [Authorize]
     public async Task<IActionResult> GetNotifications([FromQuery] bool unreadOnly = false, [FromQuery] int? pageNumber = null, [FromQuery] int? pageSize = null)
@@ -175,6 +217,9 @@ public class MobileController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Sends a notification.
+    /// </summary>
     [HttpPost("notifications/send")]
     [Authorize(Roles = "Administrator,HR")]
     public async Task<IActionResult> SendNotification([FromBody] SendNotificationCommand command)
@@ -182,6 +227,9 @@ public class MobileController : ControllerBase
         return Ok(await _mediator.Send(command));
     }
 
+    /// <summary>
+    /// Gets all leave requests for HR review.
+    /// </summary>
     [HttpGet("hr/leaves")]
     [Authorize(Roles = "Administrator,HR")]
     public async Task<IActionResult> GetAllLeavesForHR([FromQuery] int? status, [FromQuery] int? pageNumber = null, [FromQuery] int? pageSize = null)
@@ -190,6 +238,9 @@ public class MobileController : ControllerBase
         return Ok(new List<object>());
     }
 
+    /// <summary>
+    /// Approves a leave request.
+    /// </summary>
     [HttpPut("hr/leaves/{id}/approve")]
     [Authorize(Roles = "Administrator,HR")]
     public async Task<IActionResult> ApproveLeave(int id, [FromBody] ApproveRejectLeaveDto dto)
@@ -202,6 +253,9 @@ public class MobileController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Rejects a leave request.
+    /// </summary>
     [HttpPut("hr/leaves/{id}/reject")]
     [Authorize(Roles = "Administrator,HR")]
     public async Task<IActionResult> RejectLeave(int id, [FromBody] ApproveRejectLeaveDto dto)

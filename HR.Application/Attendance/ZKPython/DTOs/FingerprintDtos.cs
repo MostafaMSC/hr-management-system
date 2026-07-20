@@ -17,12 +17,12 @@ public class HRDto
     public string? Username { get; set; }
     public int FingerIndex { get; set; }
     public string FingerName { get; set; } = string.Empty;
-    
+
     /// <summary>
     /// Ø§Ù„Ø¨ØµÙ…Ø© Ø§Ù„ÙØ¹Ù„ÙŠØ© Ù…Ø´ÙØ±Ø© Ø¨ØµÙŠØºØ© Base64
     /// </summary>
     public string? Template { get; set; }
-    
+
     public int TemplateSize { get; set; }
     public string? DeviceIp { get; set; }
     public bool IsValid { get; set; }

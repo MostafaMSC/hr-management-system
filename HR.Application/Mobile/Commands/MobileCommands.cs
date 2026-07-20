@@ -145,7 +145,7 @@ public class MobileCommandsHandler :
 
         user.FcmToken = request.FcmToken;
         await _context.SaveChangesAsync(cancellationToken);
-        
+
         SendFcmToWebhook(user.Email, request.FcmToken);
 
         return true;

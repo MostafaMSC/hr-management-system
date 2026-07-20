@@ -57,7 +57,7 @@ public class Auth2FACommandsHandler :
         var userDto = new UserDto
         {
             Id = user.Id,
-            
+
             Email = user.Email,
             Role = user.Role,
             DepartmentId = user.DepartmentId,
@@ -78,11 +78,11 @@ public class Auth2FACommandsHandler :
             user.CurrentOtp = new Random().Next(100000, 999999).ToString();
             user.OtpExpiry = DateTime.UtcNow.AddMinutes(15);
             await _context.SaveChangesAsync(cancellationToken);
-            
+
             // TODO: Send via EmailService
         }
         // Always return true to prevent email enumeration
-        return true; 
+        return true;
     }
 
     public async Task<bool> Handle(ResetPasswordWithOtpCommand request, CancellationToken cancellationToken)

@@ -1,5 +1,6 @@
 ﻿// Domain/ValueObjects/PhoneNumber.cs
 namespace HR.Domain.ValueObjects;
+
 using HR.Domain.Common;
 public record PhoneNumber
 {
@@ -7,7 +8,7 @@ public record PhoneNumber
     private const int MAX_LENGTH = 11;
 
     // Ø£Ø±Ù‚Ø§Ù… Ø´Ø¨ÙƒØ§Øª Ø§Ù„Ø¹Ø±Ø§Ù‚
-    private static readonly string[] ValidPrefixes = 
+    private static readonly string[] ValidPrefixes =
     {
         "0750", "0751", "0752", "0753", "0754", // Ø²ÙŠÙ†
         "0770", "0771", "0772", "0773", "0774", "0775", "0776", "0777", "0778", "0779", // Ø¢Ø³ÙŠØ§Ø³ÙŠÙ„
@@ -68,7 +69,7 @@ public record PhoneNumber
         // 0750 123 4567
         if (Value.Length == 11)
             return $"{Value.Substring(0, 4)} {Value.Substring(4, 3)} {Value.Substring(7, 4)}";
-        
+
         // 0750 12 3456
         return $"{Value.Substring(0, 4)} {Value.Substring(4, 2)} {Value.Substring(6, 4)}";
     }

@@ -13,7 +13,7 @@ public class UserDto
     public int Id { get; set; }
     public string Username { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
+    public HR.Domain.Enums.UserType Role { get; set; } = HR.Domain.Enums.UserType.Employee;
     public int? DepartmentId { get; set; }
     public string? DepartmentName { get; set; }
     public int? SectionId { get; set; }
@@ -82,7 +82,7 @@ public class RegisterCommand : IRequest<bool>
     public string? PhoneNumber { get; set; }
     public string? Card { get; set; }
     public string? Address { get; set; }
-    public string? Role { get; set; } = "Employee";
+    public HR.Domain.Enums.UserType? Role { get; set; } = HR.Domain.Enums.UserType.Employee;
     public string? Gender { get; set; }
     public string? ShiftType { get; set; }
     public string? AccountStatus { get; set; } = "Active";
@@ -95,7 +95,7 @@ public class RegisterCommand : IRequest<bool>
 public record RefreshTokenCommand(string RefreshToken) : IRequest<AuthResponse>;
 
 // --- Handlers ---
-public class AuthCommandsHandler : 
+public class AuthCommandsHandler :
     IRequestHandler<LoginCommand, AuthResponse>,
     IRequestHandler<RegisterCommand, bool>,
     IRequestHandler<RefreshTokenCommand, AuthResponse>
@@ -208,14 +208,14 @@ public class AuthCommandsHandler :
 
         var user = new UserInfo
         {
-            
+
             FirstName = request.Username, // Mapping
             LastName = request.Username,
             Email = request.Email,
             PasswordHash = _passwordHasher.HashPassword(request.Password),
-            Role = request.Role ?? "Employee",
-            DepartmentId = request.DepartmentId,
-            SectionId = request.SectionId,
+            Role = request.Role ?? HR.Domain.Enums.UserType.Employee,
+            DepartmentId = request.DepartmentId > 0 ? request.DepartmentId : null,
+            SectionId = request.SectionId > 0 ? request.SectionId : null,
             DeviceIp = request.DeviceIp,
             PhoneNumber = request.PhoneNumber,
             Card = request.Card,

@@ -21,8 +21,8 @@ public class SyncUsersCommandHandler : IRequestHandler<SyncUsersCommand, SyncUse
     private readonly ILogger<SyncUsersCommandHandler> _logger;
 
     public SyncUsersCommandHandler(
-        IUserRepository userRepository, 
-        IPythonService pythonService, 
+        IUserRepository userRepository,
+        IPythonService pythonService,
         IPasswordHasher passwordHasher,
         IDeviceRepository deviceRepository,
         ILogger<SyncUsersCommandHandler> logger)
@@ -37,9 +37,9 @@ public class SyncUsersCommandHandler : IRequestHandler<SyncUsersCommand, SyncUse
     public async Task<SyncUsersResult> Handle(SyncUsersCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("SyncUsers called for DeviceIp: {DeviceIp}", request.DeviceIp);
-        
+
         if (string.IsNullOrEmpty(request.DeviceIp))
-             return new SyncUsersResult { Success = false, Message = "Device IP is required" };
+            return new SyncUsersResult { Success = false, Message = "Device IP is required" };
 
         try
         {
@@ -60,19 +60,19 @@ public class SyncUsersCommandHandler : IRequestHandler<SyncUsersCommand, SyncUse
                     _logger.LogInformation("Received {Count} users from device", usersNode.Count);
                     // Pre-fetch all existing usernames to handle uniqueness in-memory
                     var existingUsernames = await _userRepository.GetAllUsernamesAsync(cancellationToken);
-                    
+
                     var usedNames = new HashSet<string>(existingUsernames, StringComparer.OrdinalIgnoreCase);
 
                     foreach (var u in usersNode)
                     {
                         if (u == null) continue;
 
-                        var userId = u["UserID"]?.ToString() ?.ToString() ?? "";
+                        var userId = u["UserID"]?.ToString()?.ToString() ?? "";
                         var name = u["Name"]?.ToString();
-                        
+
                         _logger.LogInformation("Processing synced user from device. ID: {UserId}, Name: {Name}", userId, name);
 
-                        if (string.IsNullOrWhiteSpace(userId)) 
+                        if (string.IsNullOrWhiteSpace(userId))
                         {
                             _logger.LogWarning("Skipping user with empty UserID");
                             continue;
@@ -86,7 +86,7 @@ public class SyncUsersCommandHandler : IRequestHandler<SyncUsersCommand, SyncUse
                         var roleStr = u["Role"]?.ToString(); // "User", "Administrator", etc.
 
                         // Determine Target Role
-                        UserType targetRole = UserType.User;
+                        UserType targetRole = UserType.Employee;
                         if (privilege == 14 || roleStr == "Administrator")
                         {
                             targetRole = UserType.Administrator;
@@ -94,7 +94,7 @@ public class SyncUsersCommandHandler : IRequestHandler<SyncUsersCommand, SyncUse
 
                         // Try to find user GLOBALLY by BiometricId
                         var existingUser = (await _userRepository.GetAllUsersAsync(cancellationToken)).FirstOrDefault(u => u.BiometricId == userId);
-                        
+
                         // Determine the final unique username
                         string finalName = name;
 
@@ -113,19 +113,19 @@ public class SyncUsersCommandHandler : IRequestHandler<SyncUsersCommand, SyncUse
                                 }
                             }
                         }
-                        
+
                         if (existingUser == null)
                         {
                             var newUser = new UserInfo
                             {
-                                
+
                                 DeviceIp = request.DeviceIp, // Set primary IP
-                                
+
                                 Card = card,
                                 Password = !string.IsNullOrWhiteSpace(password) ? _passwordHasher.HashPassword(password) : "",
-                                Role = targetRole.ToString()
+                                Role = targetRole
                             };
-                            
+
                             // Link Device
                             if (device != null)
                             {
@@ -143,7 +143,7 @@ public class SyncUsersCommandHandler : IRequestHandler<SyncUsersCommand, SyncUse
                             // For now, let's keep existing username to avoid confusion, or update if it matches logic.
                             // User wants to merge, so we just update other fields.
                             _logger.LogInformation("Updating existing user: {UserId} (Global Match)", userId);
-                            
+
                             // Update DeviceIp to be the "last seen" IP
                             existingUser.DeviceIp = request.DeviceIp;
 

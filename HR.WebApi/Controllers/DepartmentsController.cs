@@ -18,6 +18,9 @@ public class DepartmentsController : ControllerBase
         _mediator = mediator;
     }
 
+    /// <summary>
+    /// Retrieves a list of all departments.
+    /// </summary>
     [AllowAnonymous]
     [HttpGet]
     [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any)]
@@ -27,6 +30,10 @@ public class DepartmentsController : ControllerBase
         return Ok(departments);
     }
 
+    /// <summary>
+    /// Retrieves a specific department by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the department</param>
     [HttpGet("{id}")]
     [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any)]
     public async Task<IActionResult> GetDepartmentById(int id, CancellationToken cancellationToken)
@@ -35,6 +42,10 @@ public class DepartmentsController : ControllerBase
         return Ok(department);
     }
 
+    /// <summary>
+    /// Creates a new department in the system.
+    /// </summary>
+    /// <param name="command">The details for the new department</param>
     [HttpPost]
     public async Task<IActionResult> CreateDepartment([FromBody] CreateDepartmentCommand command, CancellationToken cancellationToken)
     {
@@ -49,6 +60,11 @@ public class DepartmentsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Updates an existing department's information.
+    /// </summary>
+    /// <param name="id">The ID of the department to update</param>
+    /// <param name="command">The updated department details</param>
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateDepartment(int id, [FromBody] UpdateDepartmentCommand command, CancellationToken cancellationToken)
     {
@@ -66,6 +82,10 @@ public class DepartmentsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Deletes a department from the system.
+    /// </summary>
+    /// <param name="id">The ID of the department to delete</param>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteDepartment(int id, CancellationToken cancellationToken)
     {

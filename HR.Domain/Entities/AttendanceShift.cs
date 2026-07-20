@@ -8,7 +8,7 @@ public class AttendanceShift : BaseEntity
     public TimeSpan StartTime { get; set; }
     public TimeSpan EndTime { get; set; }
     public TimeSpan? LateThreshold { get; set; }
-    
+
     // Soft Delete
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }

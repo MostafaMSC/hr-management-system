@@ -29,7 +29,7 @@ namespace HR.Infrastructure.Services
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Role, user.Role ?? "User")
+                new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

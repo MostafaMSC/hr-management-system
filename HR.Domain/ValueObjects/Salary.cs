@@ -1,5 +1,6 @@
 ﻿namespace HR.Domain.ValueObjects;
-using HR.Domain.Common;    
+
+using HR.Domain.Common;
 public record Salary
 {
     private const decimal MINIMUM_WAGE = 500_000;
@@ -73,7 +74,7 @@ public record Salary
         return total;
     }
 
-         // Ø­Ø³Ø§Ø¨ Ø§Ù„Ù…Ø¹Ø¯Ù„ Ø§Ù„ÙŠÙˆÙ…ÙŠ
+    // Ø­Ø³Ø§Ø¨ Ø§Ù„Ù…Ø¹Ø¯Ù„ Ø§Ù„ÙŠÙˆÙ…ÙŠ
     public Money GetDailyRate(int daysInMonth = 30)
     {
         return BaseSalary.Divide(daysInMonth);
@@ -136,7 +137,7 @@ public record Salary
         {
             "housing" => Create(BaseSalary, allowance, TransportAllowance, OtherAllowances),
             "transport" => Create(BaseSalary, HousingAllowance, allowance, OtherAllowances),
-            "other" => Create(BaseSalary, HousingAllowance, TransportAllowance, 
+            "other" => Create(BaseSalary, HousingAllowance, TransportAllowance,
                 OtherAllowances?.Add(allowance) ?? allowance),
             _ => Result<Salary>.Failure($"Ù†ÙˆØ¹ Ø§Ù„Ø¹Ù„Ø§ÙˆØ© ØºÙŠØ± Ù…Ø¹Ø±ÙˆÙ: {type}")
         };

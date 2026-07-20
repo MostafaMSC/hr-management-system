@@ -26,6 +26,7 @@ public class GetShiftsQueryHandler : IRequestHandler<GetShiftsQuery, List<Attend
                 Name = s.Name,
                 StartTime = s.StartTime.ToString(@"hh\:mm"),
                 EndTime = s.EndTime.ToString(@"hh\:mm"),
+                LateThreshold = s.LateThreshold.HasValue ? s.LateThreshold.Value.ToString(@"hh\:mm") : null,
                 UserCount = s.Users.Count(u => !u.IsDeleted),
                 CreatedAt = s.CreatedAt,
                 UpdatedAt = s.UpdatedAt

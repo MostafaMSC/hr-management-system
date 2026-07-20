@@ -1,4 +1,5 @@
 ﻿namespace HR.Domain.ValueObjects;
+
 using HR.Domain.Common;
 public record Money
 {
@@ -77,7 +78,7 @@ public record Money
     // Ø§Ù„ØªÙ†Ø³ÙŠÙ‚
     public string Format() => $"{Amount:N0} {CURRENCY}";
     public string FormatShort() => $"{Amount:N0}"; // Ø¨Ø¯ÙˆÙ† Ø¹Ù…Ù„Ø©
-    
+
     public override string ToString() => Format();
 
     // Operators Ù„Ù„ØªØ³Ù‡ÙŠÙ„
@@ -85,7 +86,7 @@ public record Money
     public static Money operator -(Money left, Money right) => left.Subtract(right);
     public static Money operator *(Money money, decimal multiplier) => money.Multiply(multiplier);
     public static Money operator /(Money money, decimal divisor) => money.Divide(divisor);
-    
+
     public static bool operator >(Money left, Money right) => left.IsGreaterThan(right);
     public static bool operator <(Money left, Money right) => left.IsLessThan(right);
     public static bool operator >=(Money left, Money right) => left.IsGreaterThanOrEqual(right);

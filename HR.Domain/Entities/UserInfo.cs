@@ -9,9 +9,9 @@ public class UserInfo : BaseEntity, ISoftDelete
     public string LastName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
-    public string Role { get; set; } = "Employee";
+    public HR.Domain.Enums.UserType Role { get; set; } = HR.Domain.Enums.UserType.Employee;
     public DateTime DateOfJoining { get; set; }
-    
+
     // Auth & Mobile Additions
     public string? ProfilePictureUrl { get; set; }
     public string? FcmToken { get; set; }
@@ -28,8 +28,8 @@ public class UserInfo : BaseEntity, ISoftDelete
     public DateTime? DeletedAt { get; set; }
 
     // Employee ZKTeco Device ID (sometimes called EnrollNumber)
-    public string? BiometricId { get; set; } 
-    
+    public string? BiometricId { get; set; }
+
     // Legacy mapping properties
     public string Username { get; set; } = string.Empty;
     public string? DeviceIp { get; set; }
@@ -54,6 +54,7 @@ public class UserInfo : BaseEntity, ISoftDelete
     // Navigation properties
     public ICollection<UserDevice> UserDevices { get; set; } = new List<UserDevice>();
     public ICollection<AttendanceLog> AttendanceLogs { get; set; } = new List<AttendanceLog>();
+    [InverseProperty(nameof(LeaveRequest.UserInfo))]
     public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
     public ICollection<LeaveBalance> LeaveBalances { get; set; } = new List<LeaveBalance>();
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
@@ -68,11 +69,11 @@ public class UserInfo : BaseEntity, ISoftDelete
     public int? DirectManagerId { get; set; }
     [ForeignKey("DirectManagerId")]
     public UserInfo? DirectManager { get; set; }
-    
+
     public int? ReportToId { get; set; }
     [ForeignKey("ReportToId")]
     public UserInfo? ReportTo { get; set; }
-    
+
     public int? SecondLineManagerId { get; set; }
     [ForeignKey("SecondLineManagerId")]
     public UserInfo? SecondLineManager { get; set; }
@@ -84,7 +85,7 @@ public class UserInfo : BaseEntity, ISoftDelete
     public string? FieldOfStudy { get; set; }
     public string? WorkLocation { get; set; }
     public string? Nationality { get; set; }
-    
+
     // Derived or specific calculated fields (for DTO)
     public int ActualAlreadyTakenLeaves { get; set; }
     public int OvertimeBalanceHours { get; set; }

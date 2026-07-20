@@ -40,7 +40,7 @@ namespace HR.Application.Attendance.ZKPython.Leaves.Commands
             if (hrUser == null)
                 throw new KeyNotFoundException("HR user not found.");
 
-            if (hrUser.Role != "Admin" && hrUser.Role != "HR")
+            if (hrUser.Role != Domain.Enums.UserType.Administrator && hrUser.Role != Domain.Enums.UserType.HR)
                 throw new UnauthorizedAccessException("Only HR/Admin users can reject leave requests at this stage.");
 
             // Update leave request

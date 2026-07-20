@@ -10,12 +10,12 @@ namespace HR.Application.Common.Interfaces
         Task<List<Device>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<Device?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<Device?> GetByIpAsync(string ip, CancellationToken cancellationToken = default);
-        
+
         /// <summary>
         /// Gets all devices assigned to a user
         /// </summary>
         Task<List<Device>> GetDevicesByUserIdAsync(int userId, CancellationToken cancellationToken = default);
-        
+
         /// <summary>
         /// Updates the device assignments for a user
         /// </summary>

@@ -28,7 +28,7 @@ namespace HR.WebApi.Controllers
         private readonly IWebHostEnvironment _environment;
 
         public ZKPythonController(
-            ILogger<ZKPythonController> logger, 
+            ILogger<ZKPythonController> logger,
             IMediator mediator,
             IWebHostEnvironment environment)
         {
@@ -37,6 +37,9 @@ namespace HR.WebApi.Controllers
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }
 
+        /// <summary>
+        /// Retrieves debug information for a specific user.
+        /// </summary>
         [HttpGet("get-debug-info")]
         public async Task<IActionResult> GetDebugInfo([FromQuery] string userId)
         {
@@ -44,6 +47,9 @@ namespace HR.WebApi.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Retrieves all registered fingerprints from the database.
+        /// </summary>
         [HttpGet("get-all-fingerprints")]
         public async Task<IActionResult> GetAllFingerprints(CancellationToken cancellationToken = default)
         {
@@ -51,6 +57,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, count = fingerprints.Count, fingerprints });
         }
 
+        /// <summary>
+        /// Retrieves paginated attendance logs from the database.
+        /// </summary>
         [HttpGet("logs")]
         public async Task<IActionResult> GetLogs([FromQuery] int page = 1, [FromQuery] int pageSize = 100, [FromQuery] string deviceIp = null)
         {
@@ -58,6 +67,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, total = result.Total, page = result.Page, pageSize = result.PageSize, count = result.Data.Count, data = result.Data });
         }
 
+        /// <summary>
+        /// Retrieves paginated attendance logs directly from a specific device.
+        /// </summary>
         [HttpGet("get-logs_from_device")]
         public async Task<IActionResult> GetLogsByDevice([FromQuery] int page = 1, [FromQuery] int pageSize = 100, [FromQuery] string deviceIp = null, CancellationToken cancellationToken = default)
         {
@@ -65,6 +77,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = result.Success, total = result.Total, page = result.Page, pageSize = result.PageSize, count = result.Count, data = result.Data });
         }
 
+        /// <summary>
+        /// Retrieves all users from the database.
+        /// </summary>
         [HttpGet("get-users")]
         public async Task<IActionResult> GetUsers([FromQuery] string deviceIp = null)
         {
@@ -72,6 +87,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, count = users.Count, users });
         }
 
+        /// <summary>
+        /// Retrieves all users directly from a specific device.
+        /// </summary>
         [HttpGet("get-users-from-device")]
         public async Task<IActionResult> GetUsersFromDevice([FromQuery] string deviceIp = null)
         {
@@ -80,6 +98,9 @@ namespace HR.WebApi.Controllers
             return BadRequest(new { success = false, message = result.ErrorDetail });
         }
 
+        /// <summary>
+        /// Retrieves attendance logs for a specific user.
+        /// </summary>
         [HttpGet("get-user/{id}")]
         public async Task<IActionResult> GetUserLogs(string id, [FromQuery] string deviceIp = null)
         {
@@ -87,6 +108,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, count = userLogs.Count, userLogs });
         }
 
+        /// <summary>
+        /// Retrieves the total count of attendance logs.
+        /// </summary>
         [HttpGet("get-count")]
         public async Task<IActionResult> GetLogsCount([FromQuery] string deviceIp = null)
         {
@@ -94,6 +118,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, count = result.Total });
         }
 
+        /// <summary>
+        /// Retrieves the total count of users.
+        /// </summary>
         [HttpGet("get-users-count")]
         public async Task<IActionResult> GetUsersCount([FromQuery] string deviceIp = null)
         {
@@ -101,6 +128,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, count = users.Count });
         }
 
+        /// <summary>
+        /// Retrieves attendance logs for the current day.
+        /// </summary>
         [HttpGet("get-today")]
         public async Task<IActionResult> GetTodayLogs([FromQuery] string deviceIp = null)
         {
@@ -108,6 +138,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, count = todayLogs.Count, logs = todayLogs });
         }
 
+        /// <summary>
+        /// Retrieves user counts grouped by department.
+        /// </summary>
         [HttpGet("get-users-count-by-department")]
         public async Task<IActionResult> GetUsersCountByDepartment()
         {
@@ -117,10 +150,13 @@ namespace HR.WebApi.Controllers
                 .Select(g => new { department = g.Key, count = g.Count() })
                 .OrderByDescending(x => x.count)
                 .ToList();
-            
+
             return Ok(new { success = true, data = grouped });
         }
 
+        /// <summary>
+        /// Synchronizes users from a device to the database.
+        /// </summary>
         [HttpPost("sync-users")]
         public async Task<IActionResult> SyncUsers([FromQuery] string? deviceIp)
         {
@@ -129,6 +165,9 @@ namespace HR.WebApi.Controllers
             return BadRequest(new { success = false, message = result.ErrorDetail });
         }
 
+        /// <summary>
+        /// Searches attendance logs by user name.
+        /// </summary>
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string name)
         {
@@ -136,6 +175,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, results });
         }
 
+        /// <summary>
+        /// Retrieves a list of users who were late on a given day based on the specified threshold time.
+        /// </summary>
         [HttpGet("get-late")]
         public async Task<IActionResult> GetLate([FromQuery] string time = "08:30", [FromQuery] string deviceIp = null)
         {
@@ -143,6 +185,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, count = lateLogs.Count, lateLogs });
         }
 
+        /// <summary>
+        /// Retrieves weekly lateness reports for users based on the specified threshold time.
+        /// </summary>
         [HttpGet("get-weekly-late")]
         public async Task<IActionResult> GetWeeklyLate([FromQuery] string time = "08:30", [FromQuery] string deviceIp = null)
         {
@@ -150,6 +195,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, weekStart = result.WeekStart, weekEnd = result.WeekEnd, requiredTime = result.RequiredTime, result = result.Result });
         }
 
+        /// <summary>
+        /// Retrieves daily work hours for users.
+        /// </summary>
         [HttpGet("get-work-hours")]
         public async Task<IActionResult> GetWorkHours(
             [FromQuery] string time = "08:30",
@@ -163,6 +211,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, result });
         }
 
+        /// <summary>
+        /// Synchronizes attendance logs from a device to the database.
+        /// </summary>
         [HttpPost("sync-logs")]
         public async Task<IActionResult> SyncLogs([FromQuery] string? deviceIp)
         {
@@ -170,6 +221,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, message = result.Message, added = result.Added, skipped = result.Skipped, total = result.Total });
         }
 
+        /// <summary>
+        /// Synchronizes the device's internal time with the server time.
+        /// </summary>
         [HttpPost("sync-time")]
         public async Task<IActionResult> SyncTime([FromQuery] string deviceIp)
         {
@@ -178,6 +232,9 @@ namespace HR.WebApi.Controllers
             return BadRequest(new { success = false, message = result.ErrorDetail });
         }
 
+        /// <summary>
+        /// Resynchronizes logs from the device by fully replacing the existing records.
+        /// </summary>
         [HttpPost("resync-logs")]
         public async Task<IActionResult> ResyncLogs([FromQuery] string deviceIp)
         {
@@ -186,6 +243,9 @@ namespace HR.WebApi.Controllers
             return BadRequest(new { success = false, message = result.ErrorDetail });
         }
 
+        /// <summary>
+        /// Generates a paginated attendance report.
+        /// </summary>
         [HttpGet("get-attendance-report")]
         public async Task<IActionResult> GetAttendanceReport(
             [FromQuery] int page = 1,
@@ -200,14 +260,20 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, page = result.Page, pageSize = result.PageSize, total = result.Total, totalPages = result.TotalPages, data = result.Data });
         }
 
+        /// <summary>
+        /// Adds a new user to a device.
+        /// </summary>
         [HttpPost("add-user")]
-        public async Task<IActionResult> AddUser([FromBody] AddUserRequest  req, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> AddUser([FromBody] AddUserRequest req, CancellationToken cancellationToken = default)
         {
             var result = await _mediator.Send(new AddUserCommand(req), cancellationToken);
             if (result.Success) return Ok(new { success = true, result.Message, result.User });
             return BadRequest(new { success = false, message = result.Message });
         }
 
+        /// <summary>
+        /// Edits an existing user on a device.
+        /// </summary>
         [HttpPost("edit-user")]
         public async Task<IActionResult> EditUser([FromBody] AddUserRequest req, [FromQuery] string userId, CancellationToken cancellationToken = default)
         {
@@ -216,6 +282,9 @@ namespace HR.WebApi.Controllers
             return BadRequest(new { success = false, message = result.Message });
         }
 
+        /// <summary>
+        /// Deletes a user from a device.
+        /// </summary>
         [HttpPost("delete-user")]
         public async Task<IActionResult> DeleteUser([FromQuery] string deviceIp, [FromQuery] string userId, CancellationToken cancellationToken = default)
         {
@@ -224,6 +293,9 @@ namespace HR.WebApi.Controllers
             return BadRequest(new { success = false, message = result.Message });
         }
 
+        /// <summary>
+        /// Synchronizes fingerprint templates from a device to the database.
+        /// </summary>
         [HttpPost("sync-fingerprints")]
         public async Task<IActionResult> SyncFingerprints([FromQuery] string? deviceIp, CancellationToken cancellationToken = default)
         {
@@ -232,6 +304,9 @@ namespace HR.WebApi.Controllers
             return BadRequest(new { success = false, message = result.ErrorDetail });
         }
 
+        /// <summary>
+        /// Retrieves saved fingerprint templates for a specific user.
+        /// </summary>
         [HttpGet("get-user-fingerprints/{userId}")]
         public async Task<IActionResult> GetUserFingerprints(int userId, CancellationToken cancellationToken = default)
         {
@@ -239,6 +314,9 @@ namespace HR.WebApi.Controllers
             return Ok(new { success = true, count = fingerprints.Count, fingerprints });
         }
 
+        /// <summary>
+        /// Enrolls a new fingerprint template for a user directly on a device.
+        /// </summary>
         [HttpPost("enroll-user")]
         public async Task<IActionResult> EnrollUser([FromQuery] string deviceIp, [FromQuery] string userId, [FromQuery] int fingerIndex = 0, CancellationToken cancellationToken = default)
         {

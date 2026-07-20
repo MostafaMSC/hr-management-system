@@ -54,7 +54,7 @@ public class AuthProfileCommandsHandler :
 
         var newUrl = await _localStorage.SaveFileAsync(request.ProfilePicture, "avatars");
         user.ProfilePictureUrl = newUrl;
-        
+
         await _context.SaveChangesAsync(cancellationToken);
         return newUrl;
     }

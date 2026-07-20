@@ -1,10 +1,10 @@
 using System;
-using Npgsql;
+using MySqlConnector;
 
-var connString = "Host=localhost;Port=5432;Database=HRManagementDB;Username=postgres;Password=postgres";
-using var conn = new NpgsqlConnection(connString);
+var connString = "Server=localhost;Database=HRManagementDB;User=root;Password=;";
+using var conn = new MySqlConnection(connString);
 conn.Open();
-using var cmd = new NpgsqlCommand("SELECT \"Email\", \"PasswordHash\" FROM \"UserInfos\" WHERE \"Email\"='admin@admin.com'", conn);
+using var cmd = new MySqlCommand("SELECT `Email`, `PasswordHash` FROM `UserInfos` WHERE `Email`='admin@admin.com'", conn);
 using var reader = cmd.ExecuteReader();
 while (reader.Read()) {
     Console.WriteLine($"Email: {reader.GetString(0)}");

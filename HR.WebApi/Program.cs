@@ -20,7 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrEmpty(connectionString) || connectionString.Contains("YOUR_DATABASE_CONNECTION_STRING_HERE"))
 {
-    connectionString = "Host=localhost;Port=5432;Database=hrmanagementdb;Username=postgres;Password=postgres";
+    connectionString = "Server=localhost;Database=HRManagementDB;User=root;Password=;";
     Console.WriteLine("⚠️ WARNING: Using Hardcoded Connection String Fallback!");
 }
 
@@ -34,8 +34,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// Enable legacy timestamp behavior for PostgreSQL
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+// No longer needed for MySQL
 
 // Add Services
 builder.Services.AddApplication();
@@ -82,7 +81,19 @@ builder.Services.AddResponseCaching();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "HR Management API", Version = "v1" });
+    c.CustomSchemaIds(type => type.FullName);
+
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "HR Management API",
+        Version = "v1",
+        Description = "An ASP.NET Core Web API for managing HR operations, attendance tracking, device synchronization, and user roles.",
+        Contact = new OpenApiContact
+        {
+            Name = "HR System Support",
+            Email = "support@hrsystem.local"
+        }
+    });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -99,6 +110,15 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+
+    var appXmlFile = "HR.Application.xml";
+    var appXmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, appXmlFile);
+    if (System.IO.File.Exists(appXmlPath))
+        c.IncludeXmlComments(appXmlPath);
 });
 
 builder.Services.AddCors(options =>
@@ -160,7 +180,7 @@ using (var scope = app.Services.CreateScope())
             // Seed Default Admin User
             var adminUser = db.UserInfos.FirstOrDefault(u => u.Email == "admin@admin.com");
             var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
-            
+
             if (adminUser == null)
             {
                 Log.Information("🌱 Seeding default Admin user...");
@@ -170,7 +190,7 @@ using (var scope = app.Services.CreateScope())
                     LastName = "Admin",
                     Email = "admin@admin.com",
                     PasswordHash = passwordHasher.HashPassword("Admin123!"),
-                    Role = "Administrator",
+                    Role = HR.Domain.Enums.UserType.Administrator,
                     BiometricId = "1", // Master biometric ID
                     AccountStatus = "Active",
                     DateOfJoining = DateTime.UtcNow
@@ -185,7 +205,7 @@ using (var scope = app.Services.CreateScope())
             db.SaveChanges();
             Log.Information("✅ Default Admin user is ready. (Email: admin@admin.com, Pass: Admin123!)");
         }
-        
+
         // Auto-Repair (If Holiday logic is needed, add here. Skipping explicit repair for now since Holiday entity is not standard in HR template yet)
     }
     catch (Exception ex)

@@ -13,7 +13,7 @@ namespace HR.Application.Attendance.ZKPython.Reports.Queries;
 
 public record GetWeeklyLateQuery(string Time, string? DeviceIp) : IRequest<GetWeeklyLateResult>;
 
-public class GetWeeklyLateResult 
+public class GetWeeklyLateResult
 {
     public string WeekStart { get; set; } = string.Empty;
     public string WeekEnd { get; set; } = string.Empty;
@@ -43,10 +43,12 @@ public class GetWeeklyLateQueryHandler : IRequestHandler<GetWeeklyLateQuery, Get
 
         var result = weeklyLogs
             .GroupBy(l => new { l.UserID, l.Name })
-            .Select(g => {
+            .Select(g =>
+            {
                 var dailyFirstEntry = g
                     .GroupBy(x => x.PunchTime.Date)
-                    .Select(dayGroup => new {
+                    .Select(dayGroup => new
+                    {
                         Date = dayGroup.Key,
                         DayName = GetArabicDayName(dayGroup.Key.DayOfWeek),
                         FirstEntry = dayGroup.Min(x => x.PunchTime),
@@ -56,7 +58,8 @@ public class GetWeeklyLateQueryHandler : IRequestHandler<GetWeeklyLateQuery, Get
 
                 var dailyLate = dailyFirstEntry
                     .Where(d => d.FirstEntryTime > lateTime)
-                    .Select(d => new DailyLateDetailDto {
+                    .Select(d => new DailyLateDetailDto
+                    {
                         Date = d.Date,
                         DayName = d.DayName,
                         EntryTime = d.FirstEntry.ToString("HH:mm:ss"),
@@ -65,8 +68,9 @@ public class GetWeeklyLateQueryHandler : IRequestHandler<GetWeeklyLateQuery, Get
                     .ToList();
 
                 var totalLateMinutes = dailyLate.Sum(d => d.LateMinutes);
-                
-                return new WeeklyLateReportDto {
+
+                return new WeeklyLateReportDto
+                {
                     UserID = g.Key.UserID.ToString(),
                     Name = g.Key.Name,
                     LateDaysCount = dailyLate.Count,
@@ -79,13 +83,13 @@ public class GetWeeklyLateQueryHandler : IRequestHandler<GetWeeklyLateQuery, Get
             .OrderByDescending(x => x.TotalLateMinutes)
             .ToList();
 
-         return new GetWeeklyLateResult
-         {
-             WeekStart = startOfWeek.ToString("yyyy-MM-dd"),
-             WeekEnd = today.ToString("yyyy-MM-dd"),
-             RequiredTime = request.Time,
-             Result = result
-         };
+        return new GetWeeklyLateResult
+        {
+            WeekStart = startOfWeek.ToString("yyyy-MM-dd"),
+            WeekEnd = today.ToString("yyyy-MM-dd"),
+            RequiredTime = request.Time,
+            Result = result
+        };
     }
 
     private static string GetArabicDayName(DayOfWeek day)

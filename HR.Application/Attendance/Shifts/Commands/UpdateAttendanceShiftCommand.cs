@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HR.Application.Attendance.Shifts.Commands;
 
-public record UpdateAttendanceShiftCommand(int Id, string? Name, string? StartTime, string? EndTime) : IRequest<AttendanceShiftDto>;
+public record UpdateAttendanceShiftCommand(int Id, string? Name, string? StartTime, string? EndTime, string? LateThreshold = null) : IRequest<AttendanceShiftDto>;
 
 public class UpdateAttendanceShiftCommandHandler : IRequestHandler<UpdateAttendanceShiftCommand, AttendanceShiftDto>
 {
@@ -44,6 +44,22 @@ public class UpdateAttendanceShiftCommandHandler : IRequestHandler<UpdateAttenda
             shift.EndTime = endTime;
         }
 
+        if (request.LateThreshold != null)
+        {
+            if (string.IsNullOrWhiteSpace(request.LateThreshold))
+            {
+                shift.LateThreshold = null;
+            }
+            else if (!TimeSpan.TryParse(request.LateThreshold, out TimeSpan lateThreshold))
+            {
+                throw new ArgumentException("Invalid LateThreshold format. Use HH:mm.");
+            }
+            else
+            {
+                shift.LateThreshold = lateThreshold;
+            }
+        }
+
         shift.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -53,6 +69,7 @@ public class UpdateAttendanceShiftCommandHandler : IRequestHandler<UpdateAttenda
             Name = shift.Name,
             StartTime = shift.StartTime.ToString(@"hh\:mm"),
             EndTime = shift.EndTime.ToString(@"hh\:mm"),
+            LateThreshold = shift.LateThreshold?.ToString(@"hh\:mm"),
             UserCount = await _context.UserInfos.CountAsync(u => u.AttendanceShiftId == shift.Id && !u.IsDeleted, cancellationToken),
             CreatedAt = shift.CreatedAt,
             UpdatedAt = shift.UpdatedAt

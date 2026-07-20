@@ -21,7 +21,7 @@ namespace HR.Application.Attendance.ZKPython.Leaves.Queries
 
         public async Task<IEnumerable<LeaveRequestResponseDto>> Handle(GetEmployeeLeaveRequestsQuery request, CancellationToken cancellationToken)
         {
-        return new List<LeaveRequestResponseDto>();
+            return new List<LeaveRequestResponseDto>();
+        }
     }
-}
 }

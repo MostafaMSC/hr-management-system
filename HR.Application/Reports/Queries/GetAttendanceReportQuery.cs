@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 namespace HR.Application.Reports.Queries;
 
 public record GetAttendanceReportQuery(
-    int Page, 
-    int PageSize, 
-    string? DeviceIp, 
-    string? DateFrom, 
-    string? DateTo, 
-    string? Search, 
+    int Page,
+    int PageSize,
+    string? DeviceIp,
+    string? DateFrom,
+    string? DateTo,
+    string? Search,
     int? DepartmentId = null) : IRequest<GetAttendanceReportResult>;
 
 public class GetAttendanceReportResult
@@ -69,7 +69,7 @@ public class GetAttendanceReportQueryHandler : IRequestHandler<GetAttendanceRepo
         {
             filterDeptId = request.DepartmentId;
         }
-        else if (role == UserType.User)
+        else if (role == UserType.Employee)
         {
             filterUserId = _currentUserService.UserId;
         }
@@ -94,9 +94,9 @@ public class GetAttendanceReportQueryHandler : IRequestHandler<GetAttendanceRepo
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var search = request.Search.ToLower();
-            query = query.Where(s => 
+            query = query.Where(s =>
                 (s.UserInfo.FirstName + " " + s.UserInfo.LastName).ToLower().Contains(search) ||
-                s.UserInfo.BiometricId.Contains(search) || 
+                s.UserInfo.BiometricId.Contains(search) ||
                 s.UserInfoId.ToString().Contains(search));
         }
 
@@ -118,15 +118,15 @@ public class GetAttendanceReportQueryHandler : IRequestHandler<GetAttendanceRepo
             })
             .ToListAsync(cancellationToken);
 
-        var resultData = data.Select(x => new AttendanceLogReportResultDto 
+        var resultData = data.Select(x => new AttendanceLogReportResultDto
         {
             UserID = x.UserID,
             Name = x.Name,
             Department = x.Department,
             Date = x.Date.ToString("yyyy-MM-dd"),
             CheckIn = x.CheckIn.HasValue ? x.CheckIn.Value.ToString(@"hh\:mm") : string.Empty,
-            CheckOut = (x.CheckIn.HasValue && x.CheckOut.HasValue && (x.CheckOut.Value - x.CheckIn.Value).TotalMinutes < 30) 
-                ? null 
+            CheckOut = (x.CheckIn.HasValue && x.CheckOut.HasValue && (x.CheckOut.Value - x.CheckIn.Value).TotalMinutes < 30)
+                ? null
                 : (x.CheckOut.HasValue ? x.CheckOut.Value.ToString(@"hh\:mm") : null)
         }).ToList();
 

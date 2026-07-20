@@ -22,7 +22,7 @@ namespace HR.Application.Attendance.ZKPython.Notifications.Queries
         public async Task<List<Notification>> Handle(GetUserNotificationsQuery request, CancellationToken cancellationToken)
         {
             return await _notificationRepository.GetUserNotificationsAsync(
-                request.UserId, 
+                request.UserId,
                 request.UnreadOnly);
         }
     }

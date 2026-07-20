@@ -57,7 +57,7 @@ namespace HR.Infrastructure.Services
             // âœ… FIXED: Ø§Ø³ØªØ®Ø¯Ø§Ù… FixedTimeEquals Ù„Ù…Ù†Ø¹ timing attacks
             var storedHash = new byte[KeySize];
             Array.Copy(hashBytes, SaltSize, storedHash, 0, KeySize);
-            
+
             return CryptographicOperations.FixedTimeEquals(storedHash, computedHash);
         }
     }

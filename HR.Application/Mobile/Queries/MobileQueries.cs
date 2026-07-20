@@ -95,7 +95,7 @@ public class MobileQueriesHandler :
         var now = DateTime.UtcNow;
         var targetMonth = request.Month ?? now.Month;
         var targetYear = request.Year ?? now.Year;
-        
+
         var rangeStart = new DateTime(targetYear, targetMonth, 1);
         var rangeEnd = rangeStart.AddMonths(1).AddDays(-1);
 
@@ -136,7 +136,7 @@ public class MobileQueriesHandler :
     public async Task<object> Handle(GetNotificationsQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Notifications.Where(n => n.UserId == request.UserId);
-        
+
         if (request.UnreadOnly)
             query = query.Where(n => !n.IsRead);
 

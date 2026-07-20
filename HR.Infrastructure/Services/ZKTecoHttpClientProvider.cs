@@ -17,7 +17,7 @@ public class ZKTecoHttpClientProvider : IAttendanceProvider
     {
         _httpClient = httpClient;
         _logger = logger;
-        
+
         var baseUrl = configuration["PythonMicroservice:BaseUrl"];
         if (!string.IsNullOrEmpty(baseUrl))
         {
@@ -89,13 +89,13 @@ public class ZKTecoHttpClientProvider : IAttendanceProvider
         try
         {
             _logger.LogInformation("Starting biometric enrollment on device {DeviceIp} for user {UserId}", deviceIp, request.UserId);
-            
+
             // Adjust the timeout dynamically for interactive enrollment
             _httpClient.Timeout = TimeSpan.FromMinutes(3);
-            
+
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(TimeSpan.FromMinutes(2.5)); // Fallback cancel after 2.5 mins
-            
+
             var response = await _httpClient.PostAsJsonAsync($"/api/devices/{deviceIp}/enroll", request, cts.Token);
             return response.IsSuccessStatusCode;
         }
@@ -141,7 +141,7 @@ public class ZKTecoHttpClientProvider : IAttendanceProvider
             var response = await _httpClient.GetAsync($"/api/devices/{deviceIp}/users", cancellationToken);
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<List<DeviceUserResultDto>>(cancellationToken: cancellationToken) 
+                return await response.Content.ReadFromJsonAsync<List<DeviceUserResultDto>>(cancellationToken: cancellationToken)
                        ?? new List<DeviceUserResultDto>();
             }
         }

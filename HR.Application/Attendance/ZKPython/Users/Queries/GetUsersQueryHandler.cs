@@ -50,8 +50,8 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, List<UserInfo
         {
             if (userId.HasValue)
             {
-                 var user = await _userRepository.GetByIdAsync(userId.Value, cancellationToken);
-                 return user != null ? new List<UserInfo> { user } : new List<UserInfo>();
+                var user = await _userRepository.GetByIdAsync(userId.Value, cancellationToken);
+                return user != null ? new List<UserInfo> { user } : new List<UserInfo>();
             }
             return new List<UserInfo>();
         }

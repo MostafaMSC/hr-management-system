@@ -9,5 +9,5 @@
         public decimal? PurchasePrice { get; set; }
         public UserInfo? AssignedToUser { get; set; }
     }
-    
+
 }

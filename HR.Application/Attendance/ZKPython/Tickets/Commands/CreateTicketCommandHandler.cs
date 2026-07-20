@@ -44,11 +44,11 @@ public class CreateTicketCommandHandler : IRequestHandler<CreateTicketCommand, T
                 Priority = request.Request.Priority,
                 CreatedByUserId = request.CreatedByUserId,
                 CreatedAt = DateTime.UtcNow,
-                
+
                 // SLA
                 DueDate = dueDate,
                 IsEscalated = false,
-                
+
                 // Shared workflow
                 ManagerId = request.Request.ManagerId,
                 Category = request.Request.Category,

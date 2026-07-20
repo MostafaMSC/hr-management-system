@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 namespace HR.Application.Attendance.DailyAttendanceSummaries.Queries;
 
 public record GetDailyAttendanceSummariesQuery(
-    int? UserId, 
-    DateTime? DateFrom, 
-    DateTime? DateTo, 
-    int Page = 1, 
-    int PageSize = 20, 
-    string? SortBy = null, 
+    int? UserId,
+    DateTime? DateFrom,
+    DateTime? DateTo,
+    int Page = 1,
+    int PageSize = 20,
+    string? SortBy = null,
     string? SortDirection = "asc") : IRequest<GetDailyAttendanceSummariesResult>;
 
 public class GetDailyAttendanceSummariesResult
@@ -57,7 +57,7 @@ public class GetDailyAttendanceSummariesQueryHandler : IRequestHandler<GetDailyA
         var total = await query.CountAsync(cancellationToken);
 
         bool isDesc = request.SortDirection?.ToLower() == "desc" || request.SortDirection?.ToLower() == "descending";
-        
+
         query = request.SortBy?.ToLower() switch
         {
             "date" => isDesc ? query.OrderByDescending(s => s.Date) : query.OrderBy(s => s.Date),

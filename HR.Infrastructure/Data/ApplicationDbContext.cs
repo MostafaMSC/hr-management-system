@@ -78,14 +78,14 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             .HasOne(ud => ud.Device)
             .WithMany(d => d.UserDevices)
             .HasForeignKey(ud => ud.DeviceId);
-            
+
         // Configure RefreshTokens
         builder.Entity<RefreshToken>()
             .HasOne(rt => rt.UserInfo)
             .WithMany(u => u.RefreshTokens)
             .HasForeignKey(rt => rt.UserInfoId)
             .OnDelete(DeleteBehavior.Cascade);
-            
+
         // Configure Notifications
         builder.Entity<Notification>()
             .HasOne(n => n.User)

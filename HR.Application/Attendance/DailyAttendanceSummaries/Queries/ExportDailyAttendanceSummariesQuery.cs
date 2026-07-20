@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace HR.Application.Attendance.DailyAttendanceSummaries.Queries;
 
 public record ExportDailyAttendanceSummariesQuery(
-    int? UserId, 
-    DateTime? DateFrom, 
+    int? UserId,
+    DateTime? DateFrom,
     DateTime? DateTo) : IRequest<ExportDailyAttendanceSummariesResult>;
 
 public class ExportDailyAttendanceSummariesResult

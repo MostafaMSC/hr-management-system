@@ -11,8 +11,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(connectionString));
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
@@ -28,11 +29,11 @@ public static class DependencyInjection
 
         // Register the new FastAPI HTTP Client
         services.AddHttpClient<IAttendanceProvider, HR.Infrastructure.Services.ZKTecoHttpClientProvider>();
-        
+
         // Register other device providers
         services.AddScoped<IAttendanceProvider, HR.Infrastructure.Services.ZkTecoTcpProvider>();
         services.AddScoped<IAttendanceProvider, HR.Infrastructure.Services.HikvisionHttpProvider>();
-        
+
         // Register the Device Provider Factory
         services.AddScoped<IDeviceProviderFactory, HR.Infrastructure.Services.DeviceProviderFactory>();
 
@@ -75,16 +76,16 @@ public static class DependencyInjection
         // Authorization Policies
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("AdminPolicy", policy => 
+            options.AddPolicy("AdminPolicy", policy =>
                 policy.RequireRole("Administrator"));
 
-            options.AddPolicy("HRPolicy", policy => 
+            options.AddPolicy("HRPolicy", policy =>
                 policy.RequireRole("Administrator", "HR"));
 
-            options.AddPolicy("ManagerPolicy", policy => 
+            options.AddPolicy("ManagerPolicy", policy =>
                 policy.RequireRole("Administrator", "Manager"));
 
-            options.AddPolicy("EmployeePolicy", policy => 
+            options.AddPolicy("EmployeePolicy", policy =>
                 policy.RequireRole("Administrator", "Manager", "User", "HR"));
         });
 
@@ -134,6 +135,9 @@ public static class DependencyInjection
         services.AddScoped<IPythonService, HR.Infrastructure.Services.PythonService>();
         services.AddScoped<INotificationService, HR.Infrastructure.Services.NotificationService>();
         services.AddScoped<ICacheService, HR.Infrastructure.Services.RedisCacheService>();
+        services.AddScoped<IAttendanceEvaluationService, HR.Infrastructure.Services.AttendanceEvaluationService>();
+        services.AddScoped<IEmailService, HR.Infrastructure.Services.EmailService>();
+        services.AddScoped<IPayrollService, HR.Infrastructure.Services.PayrollService>();
 
         return services;
     }

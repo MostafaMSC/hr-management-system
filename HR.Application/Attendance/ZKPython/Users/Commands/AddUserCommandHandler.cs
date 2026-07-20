@@ -25,8 +25,8 @@ public class AddUserCommandHandler : IRequestHandler<AddUserCommand, UserOperati
     private readonly ILogger<AddUserCommandHandler> _logger;
 
     public AddUserCommandHandler(
-        IUserRepository userRepository, 
-        IPythonService pythonService, 
+        IUserRepository userRepository,
+        IPythonService pythonService,
         IPasswordHasher passwordHasher,
         IDepartmentRepository departmentRepository,
         ISectionRepository sectionRepository,
@@ -44,7 +44,7 @@ public class AddUserCommandHandler : IRequestHandler<AddUserCommand, UserOperati
     {
         var req = command.Request;
         _logger.LogInformation("AddUser called for Username: {Username}, DeviceIp: {DeviceIp}", req.Username, req.DeviceIp);
-        
+
         try
         {
             // 0. Resolve Department and Section
@@ -81,15 +81,15 @@ public class AddUserCommandHandler : IRequestHandler<AddUserCommand, UserOperati
                 }
                 else
                 {
-                     return new UserOperationResult { Success = false, Message = $"Invalid phone number: {phoneResult.Error}" };
+                    return new UserOperationResult { Success = false, Message = $"Invalid phone number: {phoneResult.Error}" };
                 }
             }
-            
+
             // 1. Add to Database First
             var newUser = new UserInfo
             {
                 DeviceIp = req.DeviceIp,
-                
+
                 Email = req.Email ?? string.Empty,
                 Department = department,
                 Section = section,
@@ -98,7 +98,7 @@ public class AddUserCommandHandler : IRequestHandler<AddUserCommand, UserOperati
                 SectionId = section?.Id,
                 Card = req.Card,
                 Address = req.Address,
-                Role = req.Role?.ToString() ?? "User",
+                Role = req.Role ?? HR.Domain.Enums.UserType.Employee,
                 Gender = req.Gender?.ToString(),
                 ShiftType = req.ShiftType?.ToString(),
                 AccountStatus = req.AccountStatus?.ToString() ?? "Active",
@@ -120,10 +120,11 @@ public class AddUserCommandHandler : IRequestHandler<AddUserCommand, UserOperati
             catch (Exception pyEx)
             {
                 _logger.LogWarning("âŒ Exception when reaching Python device sync for AddUser: {Message}", pyEx.Message);
-                return new UserOperationResult { 
-                    Success = true, 
-                    Message = "ØªÙ… Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙÙŠ Ø§Ù„Ù†Ø¸Ø§Ù… Ø¨Ù†Ø¬Ø§Ø­ØŒ Ù„ÙƒÙ† ÙØ´Ù„ Ø§Ù„Ø§ØªØµØ§Ù„ Ø¨Ø¬Ù‡Ø§Ø² Ø§Ù„Ø¨ØµÙ…Ø© (Ø³ÙŠÙ„Ø²Ù… Ù…Ø²Ø§Ù…Ù†ØªÙ‡ Ù„Ø§Ø­Ù‚Ù‹Ø§).", 
-                    User = newUser 
+                return new UserOperationResult
+                {
+                    Success = true,
+                    Message = "ØªÙ… Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙÙŠ Ø§Ù„Ù†Ø¸Ø§Ù… Ø¨Ù†Ø¬Ø§Ø­ØŒ Ù„ÙƒÙ† ÙØ´Ù„ Ø§Ù„Ø§ØªØµØ§Ù„ Ø¨Ø¬Ù‡Ø§Ø² Ø§Ù„Ø¨ØµÙ…Ø© (Ø³ÙŠÙ„Ø²Ù… Ù…Ø²Ø§Ù…Ù†ØªÙ‡ Ù„Ø§Ø­Ù‚Ù‹Ø§).",
+                    User = newUser
                 };
             }
 
@@ -135,20 +136,21 @@ public class AddUserCommandHandler : IRequestHandler<AddUserCommand, UserOperati
             }
             else
             {
-                 var errorMsg = result["error"]?.ToString() ?? "Unknown error";
-                 _logger.LogWarning("âŒ Failed to add user to device. DeviceIp: {DeviceIp}, Error: {Error}", req.DeviceIp, errorMsg);
-                 
-                 return new UserOperationResult { 
-                     Success = true, 
-                     Message = "ØªÙ… Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙÙŠ Ø§Ù„Ù†Ø¸Ø§Ù… ÙÙ‚Ø· (Ù„Ù… ØªØªÙ… Ù…Ø²Ø§Ù…Ù†ØªÙ‡ Ù…Ø¹ Ø¬Ù‡Ø§Ø² Ø§Ù„Ø¨ØµÙ…Ø© Ø¨Ø³Ø¨Ø¨ Ù…Ø´ÙƒÙ„Ø© ÙÙŠ Ø§Ù„Ø§ØªØµØ§Ù„).", 
-                     User = newUser,
-                     ErrorDetail = result 
-                 };
+                var errorMsg = result["error"]?.ToString() ?? "Unknown error";
+                _logger.LogWarning("âŒ Failed to add user to device. DeviceIp: {DeviceIp}, Error: {Error}", req.DeviceIp, errorMsg);
+
+                return new UserOperationResult
+                {
+                    Success = true,
+                    Message = "ØªÙ… Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙÙŠ Ø§Ù„Ù†Ø¸Ø§Ù… ÙÙ‚Ø· (Ù„Ù… ØªØªÙ… Ù…Ø²Ø§Ù…Ù†ØªÙ‡ Ù…Ø¹ Ø¬Ù‡Ø§Ø² Ø§Ù„Ø¨ØµÙ…Ø© Ø¨Ø³Ø¨Ø¨ Ù…Ø´ÙƒÙ„Ø© ÙÙŠ Ø§Ù„Ø§ØªØµØ§Ù„).",
+                    User = newUser,
+                    ErrorDetail = result
+                };
             }
         }
         catch (Exception ex)
         {
-             return new UserOperationResult { Success = false, Message = ex.Message };
+            return new UserOperationResult { Success = false, Message = ex.Message };
         }
     }
 }

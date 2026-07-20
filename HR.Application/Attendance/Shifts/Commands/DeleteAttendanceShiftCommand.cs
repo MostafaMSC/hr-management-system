@@ -38,7 +38,7 @@ public class DeleteAttendanceShiftCommandHandler : IRequestHandler<DeleteAttenda
         }
 
         await _context.SaveChangesAsync(cancellationToken);
-        
+
         return Unit.Value;
     }
 }

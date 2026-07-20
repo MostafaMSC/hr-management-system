@@ -17,8 +17,9 @@ public class DevicePushController : ControllerBase
     }
 
     /// <summary>
-    /// Endpoint for ADMS/Webhooks to push real-time attendance logs.
+    /// Endpoint for ADMS/Webhooks to push real-time attendance logs directly to the system.
     /// </summary>
+    /// <param name="logs">List of attendance logs to push</param>
     [HttpPost("logs")]
     public async Task<IActionResult> PushLogs([FromBody] List<AttendanceLogDto> logs, CancellationToken cancellationToken)
     {
@@ -33,7 +34,7 @@ public class DevicePushController : ControllerBase
         {
             var command = new ProcessAttendanceLogCommand { Log = log };
             var success = await _mediator.Send(command, cancellationToken);
-            
+
             if (success)
             {
                 processedCount++;

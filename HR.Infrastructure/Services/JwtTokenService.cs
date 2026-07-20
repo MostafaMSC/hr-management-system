@@ -1,4 +1,4 @@
-﻿using HR.Application.Common.Interfaces;
+using HR.Application.Common.Interfaces;
 using HR.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -35,7 +35,7 @@ public class JwtTokenService : ITokenService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role),
+            new Claim(ClaimTypes.Role, user.Role.ToString()),
             new Claim("FirstName", user.FirstName),
             new Claim("LastName", user.LastName)
         };

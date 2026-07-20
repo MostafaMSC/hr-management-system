@@ -62,22 +62,22 @@ public class GetAttendanceReportQueryHandler : IRequestHandler<GetAttendanceRepo
         {
             filterDeptId = request.DepartmentId;
         }
-        else if (role == Domain.Enums.UserType.User)
+        else if (role == Domain.Enums.UserType.Employee)
         {
             filterUserId = _currentUserService.UserId;
         }
 
         var (data, total) = await _repository.GetAttendanceReportAsync(
-            page, 
-            pageSize, 
-            request.DeviceIp, 
-            dtFrom, 
-            dtTo, 
-            request.Search, 
-            filterUserId, 
+            page,
+            pageSize,
+            request.DeviceIp,
+            dtFrom,
+            dtTo,
+            request.Search,
+            filterUserId,
             filterDeptId);
 
-        var resultData = data.Select(x => new AttendanceLogReportResultDto 
+        var resultData = data.Select(x => new AttendanceLogReportResultDto
         {
             UserID = x.UserID,
             Name = x.Name,
@@ -85,8 +85,8 @@ public class GetAttendanceReportQueryHandler : IRequestHandler<GetAttendanceRepo
             Date = x.Date.ToString("yyyy-MM-dd"),
             CheckIn = x.CheckIn.ToString("HH:mm"),
             // Ø¥Ø°Ø§ ÙƒØ§Ù† Ø§Ù„ÙØ±Ù‚ Ø£Ù‚Ù„ Ù…Ù† 30 Ø¯Ù‚ÙŠÙ‚Ø© Ø£Ùˆ Ù†ÙØ³ Ø§Ù„ÙˆÙ‚ØªØŒ Ø§Ø¹ØªØ¨Ø±Ù‡ Ø¯Ø®ÙˆÙ„ ÙÙ‚Ø·
-            CheckOut = (x.CheckIn == x.CheckOut || (x.CheckOut - x.CheckIn).TotalMinutes < 30) 
-                ? null 
+            CheckOut = (x.CheckIn == x.CheckOut || (x.CheckOut - x.CheckIn).TotalMinutes < 30)
+                ? null
                 : x.CheckOut.ToString("HH:mm")
         }).ToList();
 

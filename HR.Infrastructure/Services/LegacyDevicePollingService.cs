@@ -69,7 +69,7 @@ public class LegacyDevicePollingService : BackgroundService
                 foreach (var log in logs)
                 {
                     // Ensure the IP matches the device we just polled
-                    log.DeviceIP = device.IpAddress; 
+                    log.DeviceIP = device.IpAddress;
 
                     var command = new ProcessAttendanceLogCommand { Log = log };
                     var success = await mediator.Send(command, cancellationToken);

@@ -25,8 +25,8 @@ public class EditUserCommandHandler : IRequestHandler<EditUserCommand, UserOpera
     private readonly ILogger<EditUserCommandHandler> _logger;
 
     public EditUserCommandHandler(
-        IUserRepository userRepository, 
-        IPythonService pythonService, 
+        IUserRepository userRepository,
+        IPythonService pythonService,
         IPasswordHasher passwordHasher,
         IDepartmentRepository departmentRepository,
         ISectionRepository sectionRepository,

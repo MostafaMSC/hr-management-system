@@ -1,9 +1,10 @@
-﻿namespace HR.Domain.Enums
+namespace HR.Domain.Enums
 {
     public enum NotificationType
     {
         LeaveStatusChanged,
         WeeklyReportSent,
-        MissingFingerprint
+        MissingFingerprint,
+        Holiday
     }
 }

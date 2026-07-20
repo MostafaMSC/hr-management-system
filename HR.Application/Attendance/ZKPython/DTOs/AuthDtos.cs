@@ -1,4 +1,4 @@
-﻿using HR.Domain.Entities;
+using HR.Domain.Entities;
 using HR.Domain.Enums;
 using HR.Application.Common.Interfaces;
 using HR.Application.Attendance.ZKPython.DTOs;
@@ -23,7 +23,7 @@ public class RegisterRequest
     public PhoneNumber? PhoneNumber { get; set; }
     public string? Card { get; set; }
     public string? Address { get; set; }
-    public UserType? Role { get; set; } = HR.Domain.Enums.UserType.User;
+    public UserType? Role { get; set; } = HR.Domain.Enums.UserType.Employee;
     public Gender? Gender { get; set; }
     public ShiftType? ShiftType { get; set; }
     public AccountStatus? AccountStatus { get; set; } = HR.Domain.Enums.AccountStatus.Active;
@@ -48,7 +48,7 @@ public class UserDto
     public int Id { get; set; }
     public string Username { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
+    public HR.Domain.Enums.UserType Role { get; set; } = HR.Domain.Enums.UserType.Employee;
     public int? DepartmentId { get; set; }
     public string? DepartmentName { get; set; }
     public int? SectionId { get; set; }

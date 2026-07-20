@@ -44,7 +44,7 @@ public class SyncHRsCommandHandler : IRequestHandler<SyncHRsCommand, SyncHRsResu
         try
         {
             var devices = await GetDevicesAsync(request.DeviceIp, cancellationToken);
-            
+
             int totalAdded = 0, totalUpdated = 0, totalSkipped = 0;
             var errors = new List<string>();
 
@@ -53,10 +53,10 @@ public class SyncHRsCommandHandler : IRequestHandler<SyncHRsCommand, SyncHRsResu
                 try
                 {
                     _logger.LogInformation("ðŸ“¡ Syncing HRs from device: {DeviceIp}", deviceIp);
-                    
+
                     // 1. Get templates from Python Service
                     var jsonResult = await _pythonService.RunPythonGetTemplatesAsync(deviceIp, cancellationToken);
-                    
+
                     // Deserialize to PythonTemplateResult
                     var pythonResult = jsonResult.Deserialize<PythonTemplateResult>(new JsonSerializerOptions
                     {
@@ -71,7 +71,7 @@ public class SyncHRsCommandHandler : IRequestHandler<SyncHRsCommand, SyncHRsResu
                         continue;
                     }
 
-                    _logger.LogInformation("ðŸ“‹ Python returned {Count} templates from {DeviceIp}", 
+                    _logger.LogInformation("ðŸ“‹ Python returned {Count} templates from {DeviceIp}",
                         pythonResult.Count, deviceIp);
 
                     // 2. Prepare User Mapping
@@ -93,11 +93,11 @@ public class SyncHRsCommandHandler : IRequestHandler<SyncHRsCommand, SyncHRsResu
                     // To avoid editing Interface again right now, I'll fetch *All* users if list is large, or iterate if small.
                     // Or... I can search specifically.
                     // "GetByBiometricIdAsync" exists (single).
-                    
+
                     // Optimization: Get ALL users and build dictionary in memory. 
                     // This is acceptable for < 10k users.
                     var allUsers = await _userRepository.GetAllUsersAsync(cancellationToken);
-                    
+
                     var userMap = allUsers
                         .Where(u => !string.IsNullOrEmpty(u.BiometricId))
                         .GroupBy(u => u.BiometricId!)
@@ -128,7 +128,7 @@ public class SyncHRsCommandHandler : IRequestHandler<SyncHRsCommand, SyncHRsResu
                                 totalSkipped++;
                                 continue;
                             }
-                            
+
                             var templateBytes = Convert.FromHexString(template.Template);
 
                             // Check existence using Repository
@@ -140,24 +140,25 @@ public class SyncHRsCommandHandler : IRequestHandler<SyncHRsCommand, SyncHRsResu
                                 existing.Template = templateBytes;
                                 existing.TemplateSize = template.Size;
                                 existing.IsValid = template.Valid == 1;
-                                 
+
                                 existing.UserId = userInfo.Id; // âœ… Correct FK
-                                
+
                                 existing.UpdatedAt = DateTime.UtcNow;
-                                
+
                                 await _HRRepository.UpdateAsync(existing, cancellationToken);
                                 totalUpdated++;
-                                
+
                                 _logger.LogDebug("ðŸ”„ Updated HR for User {Username} (Id:{UserId}, BiometricId:{BiometricId}), Finger {FingerIndex}",
                                     userInfo.Username, userInfo.Id, cleanUserId, template.Fid);
                             }
                             else
                             {
                                 // Add new HR
-                                var newHR = new HR.Domain.Entities.Fingerprint {
+                                var newHR = new HR.Domain.Entities.Fingerprint
+                                {
                                     UserId = userInfo.Id,
-                                    
-                                    
+
+
                                     FingerIndex = template.Fid,
                                     Template = templateBytes,
                                     TemplateSize = template.Size,
@@ -166,17 +167,17 @@ public class SyncHRsCommandHandler : IRequestHandler<SyncHRsCommand, SyncHRsResu
                                     CreatedAt = DateTime.UtcNow,
                                     UpdatedAt = DateTime.UtcNow
                                 };
-                                
+
                                 await _HRRepository.AddAsync(newHR, cancellationToken);
                                 totalAdded++;
-                                
+
                                 _logger.LogDebug("âž• Added HR for User {Username} (Id:{UserId}, BiometricId:{BiometricId}), Finger {FingerIndex}",
                                     userInfo.Username, userInfo.Id, cleanUserId, template.Fid);
                             }
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "âŒ Error processing HR UID {Uid}, FID {Fid}, BiometricId {BiometricId}", 
+                            _logger.LogError(ex, "âŒ Error processing HR UID {Uid}, FID {Fid}, BiometricId {BiometricId}",
                                 template.Uid, template.Fid, template.UserId);
                             totalSkipped++;
                         }
@@ -187,16 +188,16 @@ public class SyncHRsCommandHandler : IRequestHandler<SyncHRsCommand, SyncHRsResu
                         var distinctSkipped = skippedUids.Distinct().Take(10).ToList();
                         var skippedMsg = $"Skipped {skippedUids.Count} HRs (First {distinctSkipped.Count}): {string.Join(", ", distinctSkipped)}";
                         if (skippedUids.Distinct().Count() > 10) skippedMsg += "... and more";
-                        
-                        _logger.LogWarning("âš ï¸ {SkippedMsg} from device {DeviceIp}. Reason: Users not found in database", 
+
+                        _logger.LogWarning("âš ï¸ {SkippedMsg} from device {DeviceIp}. Reason: Users not found in database",
                             skippedMsg, deviceIp);
                         errors.Add(skippedMsg);
                     }
 
                     // Save changes for this device
                     await _HRRepository.SaveChangesAsync(cancellationToken);
-                    
-                    _logger.LogInformation("ðŸ’¾ Saved {Added} new, {Updated} updated HRs for device {DeviceIp}", 
+
+                    _logger.LogInformation("ðŸ’¾ Saved {Added} new, {Updated} updated HRs for device {DeviceIp}",
                         totalAdded, totalUpdated, deviceIp);
                 }
                 catch (Exception ex)
@@ -208,7 +209,7 @@ public class SyncHRsCommandHandler : IRequestHandler<SyncHRsCommand, SyncHRsResu
             }
 
             var message = $"ØªÙ…Øª Ù…Ø²Ø§Ù…Ù†Ø© {totalAdded + totalUpdated} Ø¨ØµÙ…Ø© ({totalAdded} Ø¬Ø¯ÙŠØ¯Ø©ØŒ {totalUpdated} Ù…Ø­Ø¯Ø«Ø©ØŒ {totalSkipped} Ù…ØªØ¬Ø§ÙˆØ²Ø©)";
-            
+
             if (errors.Any())
             {
                 message += $". Ø£Ø®Ø·Ø§Ø¡: {errors.Count}";
@@ -230,7 +231,7 @@ public class SyncHRsCommandHandler : IRequestHandler<SyncHRsCommand, SyncHRsResu
                 Updated = totalUpdated,
                 Skipped = totalSkipped,
                 Total = totalAdded + totalUpdated + totalSkipped,
-                ErrorDetail = errors.Any() ? string.Join("; ", errors) : 
+                ErrorDetail = errors.Any() ? string.Join("; ", errors) :
                              (totalSkipped > 0 ? "Some users missing" : null)
             };
         }
@@ -259,7 +260,7 @@ public class SyncHRsCommandHandler : IRequestHandler<SyncHRsCommand, SyncHRsResu
             // Fallback? Or throw?
             // If repository is empty, maybe nothing has been seeded yet.
             // But usually we expect devices.
-             throw new Exception("Ù„Ù… ÙŠØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ Ø£Ø¬Ù‡Ø²Ø© ÙÙŠ Ø§Ù„Ù†Ø¸Ø§Ù…");
+            throw new Exception("Ù„Ù… ÙŠØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ Ø£Ø¬Ù‡Ø²Ø© ÙÙŠ Ø§Ù„Ù†Ø¸Ø§Ù…");
         }
 
         return ips!;

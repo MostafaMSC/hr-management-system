@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using HR.Application.Common.Interfaces;
 using HR.Domain.Enums;
 using Microsoft.AspNetCore.Http;
@@ -18,7 +18,7 @@ namespace HR.Infrastructure.Services
         {
             get
             {
-                var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier) 
+                var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)
                                   ?? _httpContextAccessor.HttpContext?.User?.FindFirst("sub");
                 return userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId) ? userId : null;
             }
@@ -31,16 +31,16 @@ namespace HR.Infrastructure.Services
             get
             {
                 var roleClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role);
-                return roleClaim != null && Enum.TryParse<UserType>(roleClaim.Value, out var role) 
-                    ? role 
-                    : UserType.User; // Default to User if not found
+                return roleClaim != null && Enum.TryParse<UserType>(roleClaim.Value, out var role)
+                    ? role
+                    : UserType.Employee; // Default to Employee if not found
             }
         }
 
         // We will need to ensure these claims are present in the token. 
         // For now, if they are not in the token, we might need to fetch the user from DB or add them to the token generation.
         // Let's plan to add DepartmentId to Claims in TokenService as well.
-        public int? DepartmentId 
+        public int? DepartmentId
         {
             get
             {

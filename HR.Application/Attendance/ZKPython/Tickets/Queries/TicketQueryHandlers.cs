@@ -42,7 +42,7 @@ public class GetTicketsQueryHandler : IRequestHandler<GetTicketsQuery, List<Tick
             CreatedAt = t.CreatedAt,
             UpdatedAt = t.UpdatedAt,
             ResolvedAt = t.ResolvedAt,
-            
+
             // Workflow & SLA
             ManagerId = t.ManagerId,
             ManagerName = t.Manager != null ? t.Manager.Username : null,

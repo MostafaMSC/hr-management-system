@@ -18,7 +18,7 @@ public class TicketDto
     public string Type { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public string Priority { get; set; } = string.Empty;
-    
+
     public int CreatedByUserId { get; set; }
     public string CreatedByUserName { get; set; } = string.Empty;
 

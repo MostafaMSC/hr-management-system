@@ -5,7 +5,7 @@ using MediatR;
 
 namespace HR.Application.Attendance.Shifts.Commands;
 
-public record CreateAttendanceShiftCommand(string Name, string StartTime, string EndTime) : IRequest<AttendanceShiftDto>;
+public record CreateAttendanceShiftCommand(string Name, string StartTime, string EndTime, string? LateThreshold = null) : IRequest<AttendanceShiftDto>;
 
 public class CreateAttendanceShiftCommandHandler : IRequestHandler<CreateAttendanceShiftCommand, AttendanceShiftDto>
 {
@@ -27,11 +27,20 @@ public class CreateAttendanceShiftCommandHandler : IRequestHandler<CreateAttenda
         if (!TimeSpan.TryParse(request.EndTime, out TimeSpan endTime))
             throw new ArgumentException("Invalid EndTime format. Use HH:mm.");
 
+        TimeSpan? lateThreshold = null;
+        if (!string.IsNullOrWhiteSpace(request.LateThreshold))
+        {
+            if (!TimeSpan.TryParse(request.LateThreshold, out TimeSpan lt))
+                throw new ArgumentException("Invalid LateThreshold format. Use HH:mm.");
+            lateThreshold = lt;
+        }
+
         var shift = new AttendanceShift
         {
             Name = request.Name,
             StartTime = startTime,
             EndTime = endTime,
+            LateThreshold = lateThreshold,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -45,6 +54,7 @@ public class CreateAttendanceShiftCommandHandler : IRequestHandler<CreateAttenda
             Name = shift.Name,
             StartTime = shift.StartTime.ToString(@"hh\:mm"),
             EndTime = shift.EndTime.ToString(@"hh\:mm"),
+            LateThreshold = shift.LateThreshold?.ToString(@"hh\:mm"),
             UserCount = 0,
             CreatedAt = shift.CreatedAt,
             UpdatedAt = shift.UpdatedAt

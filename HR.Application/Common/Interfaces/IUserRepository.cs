@@ -46,11 +46,11 @@ namespace HR.Application.Common.Interfaces
         Task<List<UserInfo>> GetUsersWithEmailAsync(CancellationToken cancellationToken = default);
 
 
-        
+
         // Count Queries
         Task<int> GetCountAsync(string? deviceIp = null, CancellationToken cancellationToken = default);
         Task<List<UserCountByDepartmentDto>> GetCountByDepartmentAsync(string? deviceIp = null, CancellationToken cancellationToken = default);
-        
+
         // Department Manager Queries
         Task<List<Department>> GetDepartmentsByManagerIdAsync(int managerId, CancellationToken cancellationToken = default);
     }

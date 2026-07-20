@@ -19,6 +19,9 @@ public class AuthController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Registers a new user.
+    /// </summary>
     [HttpPost("register")]
     // [Authorize(Roles = "Administrator")] // Removed to match legacy or left if needed
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
@@ -42,6 +45,9 @@ public class AuthController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Authenticates a user and issues JWT and Refresh tokens.
+    /// </summary>
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -69,6 +75,9 @@ public class AuthController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Verifies the OTP for 2FA login.
+    /// </summary>
     [HttpPost("verify-otp")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -88,6 +97,9 @@ public class AuthController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Refreshes an expired JWT access token using a valid refresh token.
+    /// </summary>
     [HttpPost("refresh")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -111,6 +123,9 @@ public class AuthController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Revokes an active token.
+    /// </summary>
     [Authorize]
     [HttpPost("revoke")]
     public async Task<IActionResult> RevokeToken([FromBody] RevokeTokenCommand command, CancellationToken cancellationToken)
@@ -119,6 +134,9 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Token revoked successfully" });
     }
 
+    /// <summary>
+    /// Logs out the user and clears authentication cookies.
+    /// </summary>
     [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
@@ -128,12 +146,15 @@ public class AuthController : ControllerBase
         {
             await _mediator.Send(new LogoutCommand(refreshToken), cancellationToken);
         }
-        
+
         Response.Cookies.Delete("accessToken");
         Response.Cookies.Delete("refreshToken");
         return Ok(new { message = "Logged out successfully" });
     }
 
+    /// <summary>
+    /// Retrieves the profile of the currently authenticated user.
+    /// </summary>
     [Authorize]
     [HttpGet("me")]
     public async Task<IActionResult> Me(CancellationToken cancellationToken)
@@ -146,6 +167,9 @@ public class AuthController : ControllerBase
         return Unauthorized(new { message = "Invalid user ID in token" });
     }
 
+    /// <summary>
+    /// Retrieves statistics for the employee on a specific date.
+    /// </summary>
     [Authorize]
     [HttpGet("employee-details")]
     public async Task<IActionResult> GetEmployeeDetails([FromQuery] DateTime? date, CancellationToken cancellationToken)
@@ -153,6 +177,9 @@ public class AuthController : ControllerBase
         return Ok(await _mediator.Send(new GetEmployeeStatsQuery(date), cancellationToken));
     }
 
+    /// <summary>
+    /// Retrieves a list of all users.
+    /// </summary>
     [Authorize]
     [HttpGet("users")]
     public async Task<IActionResult> GetAllUsers(CancellationToken cancellationToken)
@@ -160,6 +187,9 @@ public class AuthController : ControllerBase
         return Ok(await _mediator.Send(new GetUsersQuery(), cancellationToken));
     }
 
+    /// <summary>
+    /// Enables Two-Factor Authentication (2FA) for the current user.
+    /// </summary>
     [Authorize]
     [HttpPost("enable-2fa")]
     public async Task<IActionResult> Enable2FA([FromBody] Enable2FACommand command, CancellationToken cancellationToken)
@@ -173,6 +203,9 @@ public class AuthController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Disables Two-Factor Authentication (2FA) for the current user.
+    /// </summary>
     [Authorize]
     [HttpPost("disable-2fa")]
     public async Task<IActionResult> Disable2FA(CancellationToken cancellationToken)
@@ -186,6 +219,9 @@ public class AuthController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Retrieves the 2FA configuration status of the current user.
+    /// </summary>
     [Authorize]
     [HttpGet("2fa-status")]
     public async Task<IActionResult> Get2FAStatus(CancellationToken cancellationToken)
@@ -198,6 +234,9 @@ public class AuthController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Sets up a Time-based One-Time Password (TOTP) authenticator.
+    /// </summary>
     [Authorize]
     [HttpPost("setup-totp")]
     public async Task<IActionResult> SetupTotp(CancellationToken cancellationToken)
@@ -210,6 +249,9 @@ public class AuthController : ControllerBase
         return Unauthorized();
     }
 
+    /// <summary>
+    /// Verifies the TOTP setup code to finalize authenticator app enrollment.
+    /// </summary>
     [Authorize]
     [HttpPost("verify-totp-setup")]
     public async Task<IActionResult> VerifyTotpSetup([FromBody] VerifyTotpSetupCommand command, CancellationToken cancellationToken)

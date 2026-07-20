@@ -25,7 +25,7 @@ namespace HR.Application.Attendance.ZKPython.Leaves.Queries
 
         public async Task<IEnumerable<LeaveRequestResponseDto>> Handle(GetPendingManagerApprovalsQuery request, CancellationToken cancellationToken)
         {
-        return new System.Collections.Generic.List<LeaveRequestResponseDto>();
+            return new System.Collections.Generic.List<LeaveRequestResponseDto>();
+        }
     }
-}
 }

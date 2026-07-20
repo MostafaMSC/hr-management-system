@@ -21,7 +21,7 @@ public class WeeklyLateReportDto
 public class GetWeeklyLateQuery : IRequest<List<WeeklyLateReportDto>>
 {
     // Optionally specify the week start date. Defaults to current week.
-    public DateTime? WeekStartDate { get; set; } 
+    public DateTime? WeekStartDate { get; set; }
 }
 
 public class GetWeeklyLateQueryHandler : IRequestHandler<GetWeeklyLateQuery, List<WeeklyLateReportDto>>

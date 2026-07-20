@@ -30,8 +30,9 @@ namespace HR.Application.Attendance.ZKPython.Devices.Queries
         public async Task<List<DeviceStatusDto>> Handle(GetDevicesWithStatusQuery request, CancellationToken cancellationToken)
         {
             var devices = await _deviceRepository.GetAllAsync(cancellationToken);
-            
-            var tasks = devices.Select(async d => {
+
+            var tasks = devices.Select(async d =>
+            {
                 bool online = await IsPortOpen(d.IpAddress);
                 return new DeviceStatusDto(d.IpAddress, d.Name, online);
             });

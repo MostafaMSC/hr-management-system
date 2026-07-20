@@ -24,7 +24,7 @@ public class GetDebugInfoQueryHandler : IRequestHandler<GetDebugInfoQuery, Debug
     public async Task<DebugInfoDto> Handle(GetDebugInfoQuery request, CancellationToken cancellationToken)
     {
         var offset = _configuration.GetValue<double>("TimezoneOffset");
-        
+
         // Get all logs for user to analyze
         var allUserLogs = await _repository.GetLogsByUserIdAsync(request.UserId);
         var recentLogs = allUserLogs.Take(10).Select(l => new LogDebugInfo

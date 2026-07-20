@@ -21,7 +21,7 @@ namespace HR.Application.Attendance.ZKPython.Leaves.Queries
 
         public async Task<LeaveBalanceDto> Handle(GetLeaveBalanceQuery request, CancellationToken cancellationToken)
         {
-        return null;
+            return null;
+        }
     }
-}
 }
