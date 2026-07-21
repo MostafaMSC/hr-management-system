@@ -81,7 +81,7 @@ builder.Services.AddResponseCaching();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.CustomSchemaIds(type => type.FullName);
+    c.CustomSchemaIds(type => type.FullName?.Replace("+", "_"));
 
     c.SwaggerDoc("v1", new OpenApiInfo
     {

@@ -59,13 +59,18 @@ public class BonusesController : ControllerBase
         return BadRequest(new { success = false, message = result.Error });
     }
 
+    public class RejectBonusRequestDto
+    {
+        public string Reason { get; set; } = string.Empty;
+    }
+
     /// <summary>
     /// Rejects a pending bonus request. Accessible by HR/Admin.
     /// </summary>
     [HttpPost("{id}/reject")]
-    public async Task<IActionResult> RejectBonusRequest(int id, [FromBody] string reason, CancellationToken cancellationToken)
+    public async Task<IActionResult> RejectBonusRequest(int id, [FromBody] RejectBonusRequestDto request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new RejectBonusRequestCommand(id, GetCurrentUserId(), reason), cancellationToken);
+        var result = await _mediator.Send(new RejectBonusRequestCommand(id, GetCurrentUserId(), request.Reason), cancellationToken);
         if (result.IsSuccess)
             return Ok(new { success = true });
 

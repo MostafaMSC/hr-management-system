@@ -13,8 +13,8 @@ public static class MockDataSeeder
 {
     public static async Task SeedAsync(ApplicationDbContext context, IPasswordHasher passwordHasher)
     {
-        // Only seed if there are barely any users (e.g. only the default admin)
-        if (await context.UserInfos.CountAsync() > 1) return;
+        // Seed if the mock 'IT Department' doesn't exist yet
+        if (await context.Departments.AnyAsync(d => d.Name == "IT Department")) return;
 
         var rand = new Random(42); // Deterministic seed for reproducible testing
         
