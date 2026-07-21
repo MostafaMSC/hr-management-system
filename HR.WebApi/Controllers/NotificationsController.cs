@@ -27,14 +27,14 @@ public class NotificationsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetNotifications(
         [FromQuery] bool unreadOnly = false,
-        [FromQuery] int? pageNumber = null,
-        [FromQuery] int? pageSize = null)
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         var userId = _currentUserService.UserId;
         if (userId == null)
             return Unauthorized(new { message = "User not authenticated." });
 
-        var query = new GetUserNotificationsQuery(userId.Value, unreadOnly, pageNumber, pageSize);
+        var query = new GetUserNotificationsQuery(userId.Value, unreadOnly, page, pageSize);
         var notifications = await _mediator.Send(query);
         return Ok(notifications);
     }

@@ -81,15 +81,17 @@ public class BonusesController : ControllerBase
     /// Retrieves bonus requests based on filters.
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<List<BonusRequestDto>>> GetBonusRequests(
+    public async Task<ActionResult<HR.Application.Common.Models.PaginatedResult<BonusRequestDto>>> GetBonusRequests(
         [FromQuery] int? managerId,
         [FromQuery] int? targetUserId,
         [FromQuery] BonusStatus? status,
         [FromQuery] int? year,
         [FromQuery] int? month,
-        CancellationToken cancellationToken)
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
-        var query = new GetBonusRequestsQuery(managerId, targetUserId, status, year, month);
+        var query = new GetBonusRequestsQuery(managerId, targetUserId, status, year, month, page, pageSize);
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }

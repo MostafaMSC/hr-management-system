@@ -8,10 +8,12 @@ using HR.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
+using HR.Application.Common.Models;
+
 namespace HR.Application.Leaves.Queries;
 
 // MY LEAVE REQUESTS
-public class GetEmployeeLeaveRequestsQuery : IRequest<List<LeaveRequestDto>>
+public class GetEmployeeLeaveRequestsQuery : IRequest<PaginatedResult<LeaveRequestDto>>
 {
     public int UserId { get; set; }
     public LeaveStatus? Status { get; set; }
@@ -25,12 +27,12 @@ public class GetEmployeeLeaveRequestsQuery : IRequest<List<LeaveRequestDto>>
     }
 }
 
-public class GetEmployeeLeaveRequestsQueryHandler : IRequestHandler<GetEmployeeLeaveRequestsQuery, List<LeaveRequestDto>>
+public class GetEmployeeLeaveRequestsQueryHandler : IRequestHandler<GetEmployeeLeaveRequestsQuery, PaginatedResult<LeaveRequestDto>>
 {
     private readonly IApplicationDbContext _context;
     public GetEmployeeLeaveRequestsQueryHandler(IApplicationDbContext context) => _context = context;
 
-    public async Task<List<LeaveRequestDto>> Handle(GetEmployeeLeaveRequestsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResult<LeaveRequestDto>> Handle(GetEmployeeLeaveRequestsQuery request, CancellationToken cancellationToken)
     {
         var query = _context.LeaveRequests
             .Include(l => l.UserInfo)
@@ -41,13 +43,15 @@ public class GetEmployeeLeaveRequestsQueryHandler : IRequestHandler<GetEmployeeL
 
         query = query.OrderByDescending(l => l.CreatedAt);
 
+        var totalCount = await query.CountAsync(cancellationToken);
+
         if (request.PageNumber.HasValue && request.PageSize.HasValue)
         {
             var skip = (request.PageNumber.Value - 1) * request.PageSize.Value;
             query = query.Skip(skip).Take(request.PageSize.Value);
         }
 
-        return await query.Select(l => new LeaveRequestDto
+        var data = await query.Select(l => new LeaveRequestDto
         {
             Id = l.Id,
             EmployeeId = l.UserInfoId,
@@ -68,11 +72,13 @@ public class GetEmployeeLeaveRequestsQueryHandler : IRequestHandler<GetEmployeeL
             CreatedAt = l.CreatedAt,
             UpdatedAt = l.UpdatedAt
         }).ToListAsync(cancellationToken);
+
+        return new PaginatedResult<LeaveRequestDto>(data, totalCount, request.PageNumber ?? 1, request.PageSize ?? 10);
     }
 }
 
 // DEPARTMENT LEAVE REQUESTS (For Manager)
-public class GetDepartmentLeaveRequestsQuery : IRequest<List<LeaveRequestDto>>
+public class GetDepartmentLeaveRequestsQuery : IRequest<PaginatedResult<LeaveRequestDto>>
 {
     public int ManagerId { get; set; }
     public LeaveStatus? Status { get; set; }
@@ -86,12 +92,12 @@ public class GetDepartmentLeaveRequestsQuery : IRequest<List<LeaveRequestDto>>
     }
 }
 
-public class GetDepartmentLeaveRequestsQueryHandler : IRequestHandler<GetDepartmentLeaveRequestsQuery, List<LeaveRequestDto>>
+public class GetDepartmentLeaveRequestsQueryHandler : IRequestHandler<GetDepartmentLeaveRequestsQuery, PaginatedResult<LeaveRequestDto>>
 {
     private readonly IApplicationDbContext _context;
     public GetDepartmentLeaveRequestsQueryHandler(IApplicationDbContext context) => _context = context;
 
-    public async Task<List<LeaveRequestDto>> Handle(GetDepartmentLeaveRequestsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResult<LeaveRequestDto>> Handle(GetDepartmentLeaveRequestsQuery request, CancellationToken cancellationToken)
     {
         var query = _context.LeaveRequests
             .Include(l => l.UserInfo)
@@ -102,13 +108,15 @@ public class GetDepartmentLeaveRequestsQueryHandler : IRequestHandler<GetDepartm
 
         query = query.OrderByDescending(l => l.CreatedAt);
 
+        var totalCount = await query.CountAsync(cancellationToken);
+
         if (request.PageNumber.HasValue && request.PageSize.HasValue)
         {
             var skip = (request.PageNumber.Value - 1) * request.PageSize.Value;
             query = query.Skip(skip).Take(request.PageSize.Value);
         }
 
-        return await query.Select(l => new LeaveRequestDto
+        var data = await query.Select(l => new LeaveRequestDto
         {
             Id = l.Id,
             EmployeeId = l.UserInfoId,
@@ -129,11 +137,13 @@ public class GetDepartmentLeaveRequestsQueryHandler : IRequestHandler<GetDepartm
             CreatedAt = l.CreatedAt,
             UpdatedAt = l.UpdatedAt
         }).ToListAsync(cancellationToken);
+
+        return new PaginatedResult<LeaveRequestDto>(data, totalCount, request.PageNumber ?? 1, request.PageSize ?? 10);
     }
 }
 
 // ALL LEAVE REQUESTS (For HR)
-public class GetAllLeaveRequestsQuery : IRequest<List<LeaveRequestDto>>
+public class GetAllLeaveRequestsQuery : IRequest<PaginatedResult<LeaveRequestDto>>
 {
     public LeaveStatus? Status { get; set; }
     public int? PageNumber { get; set; }
@@ -145,12 +155,12 @@ public class GetAllLeaveRequestsQuery : IRequest<List<LeaveRequestDto>>
     }
 }
 
-public class GetAllLeaveRequestsQueryHandler : IRequestHandler<GetAllLeaveRequestsQuery, List<LeaveRequestDto>>
+public class GetAllLeaveRequestsQueryHandler : IRequestHandler<GetAllLeaveRequestsQuery, PaginatedResult<LeaveRequestDto>>
 {
     private readonly IApplicationDbContext _context;
     public GetAllLeaveRequestsQueryHandler(IApplicationDbContext context) => _context = context;
 
-    public async Task<List<LeaveRequestDto>> Handle(GetAllLeaveRequestsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResult<LeaveRequestDto>> Handle(GetAllLeaveRequestsQuery request, CancellationToken cancellationToken)
     {
         var query = _context.LeaveRequests
             .Include(l => l.UserInfo)
@@ -161,13 +171,15 @@ public class GetAllLeaveRequestsQueryHandler : IRequestHandler<GetAllLeaveReques
 
         query = query.OrderByDescending(l => l.CreatedAt);
 
+        var totalCount = await query.CountAsync(cancellationToken);
+
         if (request.PageNumber.HasValue && request.PageSize.HasValue)
         {
             var skip = (request.PageNumber.Value - 1) * request.PageSize.Value;
             query = query.Skip(skip).Take(request.PageSize.Value);
         }
 
-        return await query.Select(l => new LeaveRequestDto
+        var data = await query.Select(l => new LeaveRequestDto
         {
             Id = l.Id,
             EmployeeId = l.UserInfoId,
@@ -188,5 +200,7 @@ public class GetAllLeaveRequestsQueryHandler : IRequestHandler<GetAllLeaveReques
             CreatedAt = l.CreatedAt,
             UpdatedAt = l.UpdatedAt
         }).ToListAsync(cancellationToken);
+
+        return new PaginatedResult<LeaveRequestDto>(data, totalCount, request.PageNumber ?? 1, request.PageSize ?? 10);
     }
 }

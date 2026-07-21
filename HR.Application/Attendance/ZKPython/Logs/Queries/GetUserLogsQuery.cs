@@ -1,4 +1,4 @@
-﻿using HR.Domain.Entities;
+using HR.Domain.Entities;
 using HR.Domain.Enums;
 using HR.Application.Common.Interfaces;
 using HR.Application.Attendance.ZKPython.DTOs;
@@ -8,11 +8,13 @@ using HR.Application.Common.Interfaces;
 using HR.Domain.Entities;
 using MediatR;
 
+using HR.Application.Common.Models;
+
 namespace HR.Application.Attendance.ZKPython.Logs.Queries;
 
-public record GetUserLogsQuery(string UserId, string? DeviceIp) : IRequest<List<AttendanceLog>>;
+public record GetUserLogsQuery(string UserId, string? DeviceIp, int PageNumber = 1, int PageSize = 10) : IRequest<PaginatedResult<AttendanceLog>>;
 
-public class GetUserLogsQueryHandler : IRequestHandler<GetUserLogsQuery, List<AttendanceLog>>
+public class GetUserLogsQueryHandler : IRequestHandler<GetUserLogsQuery, PaginatedResult<AttendanceLog>>
 {
     private readonly IAttendanceLogRepository _repository;
 
@@ -21,8 +23,11 @@ public class GetUserLogsQueryHandler : IRequestHandler<GetUserLogsQuery, List<At
         _repository = repository;
     }
 
-    public async Task<List<AttendanceLog>> Handle(GetUserLogsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResult<AttendanceLog>> Handle(GetUserLogsQuery request, CancellationToken cancellationToken)
     {
-        return await _repository.GetLogsByUserIdAsync(request.UserId, request.DeviceIp);
+        var logs = await _repository.GetLogsByUserIdAsync(request.UserId, request.DeviceIp);
+        var totalCount = logs.Count;
+        var data = logs.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize).ToList();
+        return new PaginatedResult<AttendanceLog>(data, totalCount, request.PageNumber, request.PageSize);
     }
 }

@@ -8,11 +8,13 @@ using HR.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
+using HR.Application.Common.Models;
+
 namespace HR.Application.Bonuses.Queries;
 
-public record GetBonusRequestsQuery(int? ManagerId, int? TargetUserId, BonusStatus? Status, int? Year, int? Month) : IRequest<List<BonusRequestDto>>;
+public record GetBonusRequestsQuery(int? ManagerId, int? TargetUserId, BonusStatus? Status, int? Year, int? Month, int PageNumber = 1, int PageSize = 10) : IRequest<PaginatedResult<BonusRequestDto>>;
 
-public class GetBonusRequestsQueryHandler : IRequestHandler<GetBonusRequestsQuery, List<BonusRequestDto>>
+public class GetBonusRequestsQueryHandler : IRequestHandler<GetBonusRequestsQuery, PaginatedResult<BonusRequestDto>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -21,7 +23,7 @@ public class GetBonusRequestsQueryHandler : IRequestHandler<GetBonusRequestsQuer
         _context = context;
     }
 
-    public async Task<List<BonusRequestDto>> Handle(GetBonusRequestsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResult<BonusRequestDto>> Handle(GetBonusRequestsQuery request, CancellationToken cancellationToken)
     {
         var query = _context.BonusRequests
             .Include(b => b.RequestingManager)
@@ -44,9 +46,15 @@ public class GetBonusRequestsQueryHandler : IRequestHandler<GetBonusRequestsQuer
         if (request.Month.HasValue)
             query = query.Where(b => b.Month == request.Month.Value);
 
-        var results = await query.OrderByDescending(b => b.CreatedAt).ToListAsync(cancellationToken);
+        var totalCount = await query.CountAsync(cancellationToken);
 
-        return results.Select(b => new BonusRequestDto
+        var results = await query
+            .OrderByDescending(b => b.CreatedAt)
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
+
+        var data = results.Select(b => new BonusRequestDto
         {
             Id = b.Id,
             RequestingManagerId = b.RequestingManagerId,
@@ -64,5 +72,7 @@ public class GetBonusRequestsQueryHandler : IRequestHandler<GetBonusRequestsQuer
             Month = b.Month,
             CreatedAt = b.CreatedAt
         }).ToList();
+
+        return new PaginatedResult<BonusRequestDto>(data, totalCount, request.PageNumber, request.PageSize);
     }
 }

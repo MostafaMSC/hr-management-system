@@ -3,11 +3,13 @@ using HR.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
+using HR.Application.Common.Models;
+
 namespace HR.Application.Attendance.Shifts.Queries;
 
-public record GetShiftsQuery : IRequest<List<AttendanceShiftDto>>;
+public record GetShiftsQuery(int PageNumber = 1, int PageSize = 10) : IRequest<PaginatedResult<AttendanceShiftDto>>;
 
-public class GetShiftsQueryHandler : IRequestHandler<GetShiftsQuery, List<AttendanceShiftDto>>
+public class GetShiftsQueryHandler : IRequestHandler<GetShiftsQuery, PaginatedResult<AttendanceShiftDto>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -16,10 +18,12 @@ public class GetShiftsQueryHandler : IRequestHandler<GetShiftsQuery, List<Attend
         _context = context;
     }
 
-    public async Task<List<AttendanceShiftDto>> Handle(GetShiftsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResult<AttendanceShiftDto>> Handle(GetShiftsQuery request, CancellationToken cancellationToken)
     {
-        return await _context.AttendanceShifts
-            .Where(s => !s.IsDeleted)
+        var query = _context.AttendanceShifts.Where(s => !s.IsDeleted);
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var data = await query
             .Select(s => new AttendanceShiftDto
             {
                 Id = s.Id,
@@ -31,6 +35,10 @@ public class GetShiftsQueryHandler : IRequestHandler<GetShiftsQuery, List<Attend
                 CreatedAt = s.CreatedAt,
                 UpdatedAt = s.UpdatedAt
             })
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
             .ToListAsync(cancellationToken);
+
+        return new PaginatedResult<AttendanceShiftDto>(data, totalCount, request.PageNumber, request.PageSize);
     }
 }

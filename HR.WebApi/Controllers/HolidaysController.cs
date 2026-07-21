@@ -25,9 +25,11 @@ public class HolidaysController : ControllerBase
     /// Retrieves all registered holidays.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> GetHolidays()
+    public async Task<IActionResult> GetHolidays(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
-        var holidays = await _mediator.Send(new GetHolidaysQuery());
+        var holidays = await _mediator.Send(new GetHolidaysQuery(page, pageSize));
         return Ok(holidays);
     }
 

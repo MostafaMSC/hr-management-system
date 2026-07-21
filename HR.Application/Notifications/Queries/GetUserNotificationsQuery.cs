@@ -2,11 +2,13 @@ using HR.Application.Common.Interfaces;
 using HR.Application.Notifications.DTOs;
 using MediatR;
 
+using HR.Application.Common.Models;
+
 namespace HR.Application.Notifications.Queries;
 
-public record GetUserNotificationsQuery(int UserId, bool UnreadOnly = false, int? PageNumber = null, int? PageSize = null) : IRequest<List<NotificationDto>>;
+public record GetUserNotificationsQuery(int UserId, bool UnreadOnly = false, int PageNumber = 1, int PageSize = 10) : IRequest<PaginatedResult<NotificationDto>>;
 
-public class GetUserNotificationsQueryHandler : IRequestHandler<GetUserNotificationsQuery, List<NotificationDto>>
+public class GetUserNotificationsQueryHandler : IRequestHandler<GetUserNotificationsQuery, PaginatedResult<NotificationDto>>
 {
     private readonly INotificationRepository _notificationRepository;
 
@@ -15,18 +17,18 @@ public class GetUserNotificationsQueryHandler : IRequestHandler<GetUserNotificat
         _notificationRepository = notificationRepository;
     }
 
-    public async Task<List<NotificationDto>> Handle(GetUserNotificationsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResult<NotificationDto>> Handle(GetUserNotificationsQuery request, CancellationToken cancellationToken)
     {
         var notifications = await _notificationRepository.GetUserNotificationsAsync(request.UserId, request.UnreadOnly);
+        
+        var totalCount = notifications.Count();
+        
+        var data = notifications
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToList();
 
-        // Optional pagination logic
-        if (request.PageNumber.HasValue && request.PageSize.HasValue)
-        {
-            var skip = (request.PageNumber.Value - 1) * request.PageSize.Value;
-            notifications = notifications.Skip(skip).Take(request.PageSize.Value).ToList();
-        }
-
-        return notifications.Select(n => new NotificationDto
+        var resultData = data.Select(n => new NotificationDto
         {
             Id = n.Id,
             Title = n.Title,
@@ -38,5 +40,7 @@ public class GetUserNotificationsQueryHandler : IRequestHandler<GetUserNotificat
             UserId = n.UserId,
             CreatedAt = n.CreatedAt
         }).ToList();
+
+        return new PaginatedResult<NotificationDto>(resultData, totalCount, request.PageNumber, request.PageSize);
     }
 }

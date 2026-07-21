@@ -108,11 +108,11 @@ public class LeaveRequestsController : ControllerBase
     /// Retrieves all leave requests for the currently logged-in employee.
     /// </summary>
     [HttpGet("my-requests")]
-    public async Task<IActionResult> GetMyLeaveRequests([FromQuery] LeaveStatus? leaveStatus = null, [FromQuery] int? pageNumber = null, [FromQuery] int? pageSize = null)
+    public async Task<IActionResult> GetMyLeaveRequests([FromQuery] LeaveStatus? leaveStatus = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         var query = new GetEmployeeLeaveRequestsQuery(GetCurrentUserId(), leaveStatus)
         {
-            PageNumber = pageNumber,
+            PageNumber = page,
             PageSize = pageSize
         };
         var requests = await _mediator.Send(query);
@@ -135,11 +135,11 @@ public class LeaveRequestsController : ControllerBase
     /// </summary>
     [HttpGet("department-requests")]
     [Authorize(Roles = "Manager,Administrator,HR")]
-    public async Task<IActionResult> GetDepartmentRequests([FromQuery] LeaveStatus? status = null, [FromQuery] int? pageNumber = null, [FromQuery] int? pageSize = null)
+    public async Task<IActionResult> GetDepartmentRequests([FromQuery] LeaveStatus? status = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         var query = new GetDepartmentLeaveRequestsQuery(GetCurrentUserId(), status)
         {
-            PageNumber = pageNumber,
+            PageNumber = page,
             PageSize = pageSize
         };
         var requests = await _mediator.Send(query);
@@ -151,12 +151,12 @@ public class LeaveRequestsController : ControllerBase
     /// </summary>
     [HttpGet("hr-approvals")]
     [Authorize(Roles = "Administrator,HR")]
-    public async Task<IActionResult> GetHRApprovals([FromQuery] LeaveStatus? status = null, [FromQuery] int? pageNumber = null, [FromQuery] int? pageSize = null)
+    public async Task<IActionResult> GetHRApprovals([FromQuery] LeaveStatus? status = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         var queryStatus = status ?? LeaveStatus.AwaitingHRApproval;
         var query = new GetAllLeaveRequestsQuery(queryStatus)
         {
-            PageNumber = pageNumber,
+            PageNumber = page,
             PageSize = pageSize
         };
         var requests = await _mediator.Send(query);

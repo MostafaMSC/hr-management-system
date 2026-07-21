@@ -24,9 +24,12 @@ public class DepartmentsController : ControllerBase
     [AllowAnonymous]
     [HttpGet]
     [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any)]
-    public async Task<IActionResult> GetDepartments(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetDepartments(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
-        var departments = await _mediator.Send(new GetDepartmentsQuery(), cancellationToken);
+        var departments = await _mediator.Send(new GetDepartmentsQuery(page, pageSize), cancellationToken);
         return Ok(departments);
     }
 

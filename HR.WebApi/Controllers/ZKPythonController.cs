@@ -102,10 +102,10 @@ namespace HR.WebApi.Controllers
         /// Retrieves attendance logs for a specific user.
         /// </summary>
         [HttpGet("get-user/{id}")]
-        public async Task<IActionResult> GetUserLogs(string id, [FromQuery] string deviceIp = null)
+        public async Task<IActionResult> GetUserLogs(string id, [FromQuery] string deviceIp = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 100)
         {
-            var userLogs = await _mediator.Send(new GetUserLogsQuery(id, deviceIp));
-            return Ok(new { success = true, count = userLogs.Count, userLogs });
+            var result = await _mediator.Send(new GetUserLogsQuery(id, deviceIp, page, pageSize));
+            return Ok(new { success = true, total = result.Total, page = result.Page, pageSize = result.PageSize, count = result.Data.Count, userLogs = result.Data });
         }
 
         /// <summary>
@@ -132,10 +132,10 @@ namespace HR.WebApi.Controllers
         /// Retrieves attendance logs for the current day.
         /// </summary>
         [HttpGet("get-today")]
-        public async Task<IActionResult> GetTodayLogs([FromQuery] string deviceIp = null)
+        public async Task<IActionResult> GetTodayLogs([FromQuery] string deviceIp = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 100)
         {
-            var todayLogs = await _mediator.Send(new GetTodayLogsQuery(deviceIp));
-            return Ok(new { success = true, count = todayLogs.Count, logs = todayLogs });
+            var result = await _mediator.Send(new GetTodayLogsQuery(deviceIp, page, pageSize));
+            return Ok(new { success = true, total = result.Total, page = result.Page, pageSize = result.PageSize, count = result.Data.Count, logs = result.Data });
         }
 
         /// <summary>
@@ -163,10 +163,10 @@ namespace HR.WebApi.Controllers
         /// Searches attendance logs by user name.
         /// </summary>
         [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string name)
+        public async Task<IActionResult> Search([FromQuery] string name, [FromQuery] int page = 1, [FromQuery] int pageSize = 100)
         {
-            var results = await _mediator.Send(new SearchLogsQuery(name));
-            return Ok(new { success = true, results });
+            var result = await _mediator.Send(new SearchLogsQuery(name, page, pageSize));
+            return Ok(new { success = true, total = result.Total, page = result.Page, pageSize = result.PageSize, count = result.Data.Count, results = result.Data });
         }
 
         /// <summary>

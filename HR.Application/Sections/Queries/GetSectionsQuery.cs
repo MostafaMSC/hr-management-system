@@ -2,11 +2,13 @@ using HR.Application.Common.Interfaces;
 using HR.Application.Sections.DTOs;
 using MediatR;
 
+using HR.Application.Common.Models;
+
 namespace HR.Application.Sections.Queries;
 
-public record GetSectionsQuery(int? DepartmentId = null) : IRequest<List<SectionDto>>;
+public record GetSectionsQuery(int? DepartmentId = null, int PageNumber = 1, int PageSize = 10) : IRequest<PaginatedResult<SectionDto>>;
 
-public class GetSectionsQueryHandler : IRequestHandler<GetSectionsQuery, List<SectionDto>>
+public class GetSectionsQueryHandler : IRequestHandler<GetSectionsQuery, PaginatedResult<SectionDto>>
 {
     private readonly ISectionRepository _sectionRepository;
 
@@ -15,11 +17,16 @@ public class GetSectionsQueryHandler : IRequestHandler<GetSectionsQuery, List<Se
         _sectionRepository = sectionRepository;
     }
 
-    public async Task<List<SectionDto>> Handle(GetSectionsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResult<SectionDto>> Handle(GetSectionsQuery request, CancellationToken cancellationToken)
     {
         var sections = await _sectionRepository.GetAllAsync(request.DepartmentId);
-
-        return sections.Select(s => new SectionDto
+        
+        var totalCount = sections.Count();
+        
+        var data = sections
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .Select(s => new SectionDto
         {
             Id = s.Id,
             Name = s.Name,
@@ -29,5 +36,7 @@ public class GetSectionsQueryHandler : IRequestHandler<GetSectionsQuery, List<Se
             CreatedAt = s.CreatedAt,
             UpdatedAt = s.UpdatedAt
         }).ToList();
+
+        return new PaginatedResult<SectionDto>(data, totalCount, request.PageNumber, request.PageSize);
     }
 }

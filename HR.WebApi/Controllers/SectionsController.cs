@@ -23,10 +23,13 @@ public class SectionsController : ControllerBase
     /// </summary>
     [AllowAnonymous]
     [HttpGet]
-    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "departmentId" })]
-    public async Task<IActionResult> GetSections([FromQuery] int? departmentId = null)
+    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "departmentId", "page", "pageSize" })]
+    public async Task<IActionResult> GetSections(
+        [FromQuery] int? departmentId = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
-        var sections = await _mediator.Send(new GetSectionsQuery(departmentId));
+        var sections = await _mediator.Send(new GetSectionsQuery(departmentId, page, pageSize));
         return Ok(sections);
     }
 

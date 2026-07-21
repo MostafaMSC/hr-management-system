@@ -22,9 +22,12 @@ public class AttendanceShiftsController : ControllerBase
     /// Retrieves all attendance shifts in the system.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> GetShifts(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetShifts(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetShiftsQuery(), cancellationToken);
+        var result = await _mediator.Send(new GetShiftsQuery(page, pageSize), cancellationToken);
         return Ok(result);
     }
 

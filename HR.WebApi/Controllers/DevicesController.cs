@@ -61,6 +61,16 @@ namespace HR.WebApi.Controllers
             return BadRequest(result);
         }
 
+        /// <summary>
+        /// Registers a new device in the system.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> CreateDevice([FromBody] CreateDeviceCommand command)
+        {
+            var deviceId = await _mediator.Send(command);
+            return Ok(deviceId);
+        }
+
         public class UpdateUserDevicesRequest
         {
             public int UserId { get; set; }
