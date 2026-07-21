@@ -45,16 +45,30 @@ public class AuthController : ControllerBase
         }
     }
 
+    public class LoginRequestDto
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class TestLoginRequestDto
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public double ExpiryMinutes { get; set; } = 1;
+    }
+
     /// <summary>
     /// Authenticates a user and issues JWT and Refresh tokens.
     /// </summary>
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto request, CancellationToken cancellationToken)
     {
         try
         {
+            var command = new LoginCommand(request.Username, request.Password, null); // Forced null for security
             var response = await _mediator.Send(command, cancellationToken);
 
             if (!response.Requires2FA && response.AccessToken != null && response.RefreshToken != null)
@@ -81,12 +95,12 @@ public class AuthController : ControllerBase
     [HttpPost("login-short-token")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> LoginShortToken([FromBody] LoginCommand command, [FromQuery] double expiryMinutes = 1, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> LoginShortToken([FromBody] TestLoginRequestDto request, CancellationToken cancellationToken = default)
     {
         try
         {
-            var cmdWithExpiry = command with { ExpiryMinutes = expiryMinutes };
-            var response = await _mediator.Send(cmdWithExpiry, cancellationToken);
+            var command = new LoginCommand(request.Username, request.Password, request.ExpiryMinutes);
+            var response = await _mediator.Send(command, cancellationToken);
 
             if (!response.Requires2FA && response.AccessToken != null && response.RefreshToken != null)
             {
