@@ -6,7 +6,7 @@ namespace HR.Application.Auth.Queries;
 
 // --- Queries ---
 public record GetMeQuery(int UserId) : IRequest<object>;
-public record GetUsersQuery(int Page = 1, int PageSize = 100) : IRequest<object>;
+public record GetUsersQuery(int Page = 1, int PageSize = 100, string? SearchTerm = null) : IRequest<object>;
 public record Get2FAStatusQuery(int UserId) : IRequest<object>;
 public record GetEmployeeStatsQuery(DateTime? Date) : IRequest<object>;
 
@@ -61,6 +61,17 @@ public class AuthQueriesHandler :
             .Include(u => u.Department)
             .Include(u => u.Section)
             .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            var search = request.SearchTerm.ToLower();
+            query = query.Where(u => 
+                (u.Username != null && u.Username.ToLower().Contains(search)) ||
+                (u.FirstName != null && u.FirstName.ToLower().Contains(search)) ||
+                (u.LastName != null && u.LastName.ToLower().Contains(search)) ||
+                (u.Email != null && u.Email.ToLower().Contains(search))
+            );
+        }
 
         var total = await query.CountAsync(cancellationToken);
 

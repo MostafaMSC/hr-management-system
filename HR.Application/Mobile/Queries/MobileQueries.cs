@@ -96,7 +96,7 @@ public class MobileQueriesHandler :
         var targetMonth = request.Month ?? now.Month;
         var targetYear = request.Year ?? now.Year;
 
-        var rangeStart = new DateTime(targetYear, targetMonth, 1);
+        var rangeStart = new DateTime(targetYear, targetMonth, 1, 0, 0, 0, DateTimeKind.Utc);
         var rangeEnd = rangeStart.AddMonths(1).AddDays(-1);
 
         var logs = await _context.AttendanceLogs
