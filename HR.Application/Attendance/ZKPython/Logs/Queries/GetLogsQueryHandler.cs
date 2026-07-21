@@ -47,6 +47,9 @@ public class GetLogsQueryHandler : IRequestHandler<GetLogsQuery, LogsResult>
             request.DeviceIp,
             filterUserId,
             filterDeptId,
+            request.StartDate,
+            request.EndDate,
+            request.EmployeeId,
             cancellationToken);
 
         return new LogsResult

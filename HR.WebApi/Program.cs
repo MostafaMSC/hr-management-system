@@ -39,6 +39,7 @@ builder.Host.UseSerilog();
 // Add Services
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddHostedService<HR.WebApi.Services.DeviceSyncBackgroundService>();
 
 // Add Controllers with JSON options
 builder.Services.AddControllers()

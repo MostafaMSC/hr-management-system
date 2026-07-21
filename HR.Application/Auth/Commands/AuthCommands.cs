@@ -208,7 +208,7 @@ public class AuthCommandsHandler :
 
         var user = new UserInfo
         {
-
+            Username = request.Username,
             FirstName = request.Username, // Mapping
             LastName = request.Username,
             Email = request.Email,
@@ -223,10 +223,10 @@ public class AuthCommandsHandler :
             Gender = request.Gender,
             ShiftType = request.ShiftType,
             AccountStatus = request.AccountStatus ?? "Active",
-            BirthDate = request.BirthDate,
-            HireDate = request.HireDate,
+            BirthDate = request.BirthDate.HasValue ? DateTime.SpecifyKind(request.BirthDate.Value, DateTimeKind.Utc) : null,
+            HireDate = request.HireDate.HasValue ? DateTime.SpecifyKind(request.HireDate.Value, DateTimeKind.Utc) : null,
             Is2FAEnabled = request.TwoFactorEnabled,
-            DateOfJoining = request.HireDate ?? DateTime.UtcNow,
+            DateOfJoining = request.HireDate.HasValue ? DateTime.SpecifyKind(request.HireDate.Value, DateTimeKind.Utc) : DateTime.UtcNow,
             ProfilePictureUrl = imagePath
         };
 

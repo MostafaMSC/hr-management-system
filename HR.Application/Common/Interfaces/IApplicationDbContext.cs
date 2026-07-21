@@ -20,6 +20,7 @@ public interface IApplicationDbContext
     DbSet<RefreshToken> RefreshTokens { get; }
     DbSet<Notification> Notifications { get; }
     DbSet<BonusRequest> BonusRequests { get; }
+    DbSet<DeviceSyncTask> DeviceSyncTasks { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

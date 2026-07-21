@@ -9,7 +9,8 @@ namespace HR.Application.Attendance.DailyAttendanceSummaries.Queries;
 public record ExportDailyAttendanceSummariesQuery(
     int? UserId,
     DateTime? DateFrom,
-    DateTime? DateTo) : IRequest<ExportDailyAttendanceSummariesResult>;
+    DateTime? DateTo,
+    string? Search = null) : IRequest<ExportDailyAttendanceSummariesResult>;
 
 public class ExportDailyAttendanceSummariesResult
 {
@@ -49,6 +50,15 @@ public class ExportDailyAttendanceSummariesQueryHandler : IRequestHandler<Export
         if (request.DateTo.HasValue)
         {
             query = query.Where(s => s.Date <= request.DateTo.Value.Date);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var searchLower = request.Search.ToLower();
+            query = query.Where(s => 
+                (s.UserInfo != null && s.UserInfo.Username.ToLower().Contains(searchLower)) ||
+                (s.UserInfo != null && s.UserInfo.BiometricId != null && s.UserInfo.BiometricId.ToLower().Contains(searchLower))
+            );
         }
 
         var items = await query

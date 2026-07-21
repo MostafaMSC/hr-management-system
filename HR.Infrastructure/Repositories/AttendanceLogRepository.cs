@@ -30,13 +30,16 @@ namespace HR.Infrastructure.Repositories
         public Task<int> GetLogsCountAsync(string? deviceIp = null) => 
             _context.AttendanceLogs.CountAsync(l => deviceIp == null || l.DeviceIP == deviceIp);
             
-        public async Task<(List<AttendanceLog> Data, int Total)> GetPagedLogsAsync(int page, int pageSize, string? deviceIp, int? userId = null, int? departmentId = null, CancellationToken cancellationToken = default)
+        public async Task<(List<AttendanceLog> Data, int Total)> GetPagedLogsAsync(int page, int pageSize, string? deviceIp, int? userId = null, int? departmentId = null, DateTime? startDate = null, DateTime? endDate = null, string? employeeId = null, CancellationToken cancellationToken = default)
         {
             var query = _context.AttendanceLogs.Include(l => l.UserInfo).AsQueryable();
             
-            if (!string.IsNullOrEmpty(deviceIp)) query = query.Where(l => l.DeviceIP == deviceIp);
+            if (!string.IsNullOrEmpty(deviceIp)) query = query.Where(l => l.DeviceIP == deviceIp || (l.DeviceIP != null && l.DeviceIP.Contains(deviceIp)));
             if (userId.HasValue) query = query.Where(l => l.UserInfoId == userId.Value);
             if (departmentId.HasValue) query = query.Where(l => l.UserInfo.DepartmentId == departmentId.Value);
+            if (startDate.HasValue) query = query.Where(l => l.PunchTime >= startDate.Value);
+            if (endDate.HasValue) query = query.Where(l => l.PunchTime <= endDate.Value);
+            if (!string.IsNullOrEmpty(employeeId)) query = query.Where(l => l.UserInfo.BiometricId == employeeId);
 
             var total = await query.CountAsync(cancellationToken);
             var data = await query.OrderByDescending(l => l.PunchTime)

@@ -38,6 +38,7 @@ public class UpdateUserDevicesCommandHandler : IRequestHandler<UpdateUserDevices
     private readonly IFingerprintRepository _fingerprintRepository;
     private readonly ILogger<UpdateUserDevicesCommandHandler> _logger;
     private readonly ICacheService _cache;
+    private readonly IApplicationDbContext _dbContext;
 
     public UpdateUserDevicesCommandHandler(
         IDeviceRepository deviceRepository,
@@ -45,7 +46,8 @@ public class UpdateUserDevicesCommandHandler : IRequestHandler<UpdateUserDevices
         IDeviceProviderFactory deviceProviderFactory,
         IFingerprintRepository fingerprintRepository,
         ILogger<UpdateUserDevicesCommandHandler> logger,
-        ICacheService cache)
+        ICacheService cache,
+        IApplicationDbContext dbContext)
     {
         _deviceRepository = deviceRepository;
         _userRepository = userRepository;
@@ -53,6 +55,7 @@ public class UpdateUserDevicesCommandHandler : IRequestHandler<UpdateUserDevices
         _fingerprintRepository = fingerprintRepository;
         _logger = logger;
         _cache = cache;
+        _dbContext = dbContext;
     }
 
     public async Task<UpdateUserDevicesResult> Handle(UpdateUserDevicesCommand request, CancellationToken cancellationToken)
@@ -73,9 +76,6 @@ public class UpdateUserDevicesCommandHandler : IRequestHandler<UpdateUserDevices
                 await _userRepository.UpdateAsync(user, cancellationToken);
             }
 
-            // Fetch fingerprints for the user
-            var userFingerprints = (await _fingerprintRepository.GetByUserIdAsync(user.Id, cancellationToken)).ToList();
-
             // 2. Prepare Lists
             var allDevices = await _deviceRepository.GetAllAsync(cancellationToken);
             var currentDevices = await _deviceRepository.GetDevicesByUserIdAsync(request.UserId, cancellationToken);
@@ -86,135 +86,45 @@ public class UpdateUserDevicesCommandHandler : IRequestHandler<UpdateUserDevices
             var devicesToRemove = allDevices.Where(d => currentDeviceIds.Contains(d.Id) && !requestedDeviceIds.Contains(d.Id)).ToList();
             var devicesToSync = allDevices.Where(d => requestedDeviceIds.Contains(d.Id)).ToList();
 
-            var results = new List<string>();
-            var errors = new List<string>();
-            var successfulSyncDeviceIds = new List<int>();
+            // 3. Update Database (Desired State)
+            await _deviceRepository.UpdateUserDevicesAsync(request.UserId, request.DeviceIds, cancellationToken);
 
-            // Convert Fingerprints to DTOs for the provider
-            var fingerprintDtos = userFingerprints.Select(f => new DeviceFingerprintDto
+            // 4. Queue Sync Tasks
+            foreach (var device in devicesToSync)
             {
-                FingerIndex = f.FingerIndex,
-                Template = Convert.ToBase64String(f.Template)
-            }).ToList();
-
-            var syncUserDto = new SyncUserRequestDto
-            {
-                UserId = user.BiometricId,
-                Name = user.Username ?? $"{user.FirstName} {user.LastName}",
-                Password = user.Password,
-                Card = user.Card ?? "0",
-                Privilege = user.Role == UserType.Administrator ? 14 : 0,
-                Fingerprints = fingerprintDtos
-            };
-
-            // =========================================================================================
-            // PHASE 1: Sync to Target Devices (Parallel Safe Writes)
-            // =========================================================================================
-            _logger.LogInformation("🚀 Starting Phase 1: Syncing user {UserId} to {Count} devices...", user.BiometricId, devicesToSync.Count);
-
-            var syncTasks = devicesToSync.Select(async device =>
-            {
-                try
+                _dbContext.DeviceSyncTasks.Add(new DeviceSyncTask
                 {
-                    _logger.LogInformation("⏳ Syncing to {DeviceName} ({Ip})...", device.Name, device.IpAddress);
-                    var provider = _deviceProviderFactory.GetProvider(device.Protocol);
-
-                    var success = await provider.SyncFullUserAsync(device.IpAddress, syncUserDto, cancellationToken);
-
-                    if (success)
-                    {
-                        return (DeviceId: device.Id, DeviceName: device.Name, Success: true, Message: $"تمت المزامنة مع {device.Name} بنجاح");
-                    }
-                    else
-                    {
-                        return (DeviceId: device.Id, DeviceName: device.Name, Success: false, Message: $"فشل المزامنة مع {device.Name}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    return (DeviceId: device.Id, DeviceName: device.Name, Success: false, Message: $"خطأ في {device.Name}: {ex.Message}");
-                }
-            });
-
-            var syncResults = await Task.WhenAll(syncTasks);
-
-            foreach (var res in syncResults)
-            {
-                if (res.Success)
-                {
-                    successfulSyncDeviceIds.Add(res.DeviceId);
-                    results.Add(res.Message);
-                }
-                else
-                {
-                    errors.Add(res.Message);
-                    _logger.LogWarning("❌ Sync failed for {Device}: {Message}", res.DeviceName, res.Message);
-                }
-            }
-
-            // =========================================================================================
-            // PHASE 2: Delete from Old Devices (Safe Deletes)
-            // =========================================================================================
-            bool isSafeToDelete = successfulSyncDeviceIds.Count > 0 || requestedDeviceIds.Count == 0;
-
-            if (isSafeToDelete && devicesToRemove.Count > 0)
-            {
-                _logger.LogInformation("🚀 Starting Phase 2: Removing from {Count} old devices...", devicesToRemove.Count);
-
-                var removeTasks = devicesToRemove.Select(async device =>
-                {
-                    try
-                    {
-                        var provider = _deviceProviderFactory.GetProvider(device.Protocol);
-                        var success = await provider.DeleteUserAsync(device.IpAddress, user.BiometricId, cancellationToken);
-
-                        if (success)
-                            return $"تم الحذف من {device.Name}";
-                        else
-                            return $"فشل الحذف من {device.Name}";
-                    }
-                    catch (Exception ex)
-                    {
-                        return $"خطأ أثناء الحذف من {device.Name}: {ex.Message}";
-                    }
+                    UserId = request.UserId,
+                    DeviceId = device.Id,
+                    Action = SyncAction.Add,
+                    Status = SyncTaskStatus.Pending
                 });
-
-                var removeResults = await Task.WhenAll(removeTasks);
-                results.AddRange(removeResults);
             }
-            else if (devicesToRemove.Count > 0)
+
+            foreach (var device in devicesToRemove)
             {
-                var msg = "⚠️ تم إيقاف الحذف من الأجهزة القديمة لأن جميع عمليات النقل للأجهزة الجديدة فشلت. بيانات المستخدم آمنة في الأجهزة القديمة.";
-                _logger.LogWarning(msg);
-                errors.Add(msg);
+                _dbContext.DeviceSyncTasks.Add(new DeviceSyncTask
+                {
+                    UserId = request.UserId,
+                    DeviceId = device.Id,
+                    Action = SyncAction.Delete,
+                    Status = SyncTaskStatus.Pending
+                });
             }
 
-            // =========================================================================================
-            // PHASE 3: Update Database
-            // =========================================================================================
-            var finalDbDeviceIds = new HashSet<int>(successfulSyncDeviceIds);
-
-            if (!isSafeToDelete)
-            {
-                // If we skipped deleting, we MUST keep the old devices in the DB
-                foreach (var d in devicesToRemove) finalDbDeviceIds.Add(d.Id);
-            }
-
-            await _deviceRepository.UpdateUserDevicesAsync(request.UserId, finalDbDeviceIds.ToList(), cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             // Invalidate device cache
             await _cache.RemoveAsync("Cache_AllDevices", cancellationToken);
 
-            var isOverallSuccess = errors.Count == 0 || successfulSyncDeviceIds.Count > 0;
-
             return new UpdateUserDevicesResult
             {
-                Success = isOverallSuccess,
-                Message = isOverallSuccess ? "تم تحديث الأجهزة" : "فشل جميع العمليات",
-                DevicesAdded = successfulSyncDeviceIds.Count,
+                Success = true,
+                Message = "تم حفظ الأجهزة. سيتم مزامنة الأجهزة في الخلفية.",
+                DevicesAdded = devicesToSync.Count,
                 DevicesRemoved = devicesToRemove.Count,
-                Details = results,
-                Errors = errors
+                Details = new List<string> { "Tasks queued for background sync." },
+                Errors = new List<string>()
             };
         }
         catch (Exception ex)

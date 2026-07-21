@@ -29,8 +29,8 @@ public class ExportAttendanceFilteredQueryHandler : IRequestHandler<ExportAttend
 
     public Task<IAsyncEnumerable<AttendanceLogReportResultDto>> Handle(ExportAttendanceFilteredQuery request, CancellationToken cancellationToken)
     {
-        DateTime? dtFrom = DateTime.TryParse(request.DateFrom, out DateTime f) ? f : null;
-        DateTime? dtTo = DateTime.TryParse(request.DateTo, out DateTime t) ? t : null;
+        DateTime? dtFrom = DateTime.TryParse(request.DateFrom, out DateTime f) ? DateTime.SpecifyKind(f, DateTimeKind.Utc) : null;
+        DateTime? dtTo = DateTime.TryParse(request.DateTo, out DateTime t) ? DateTime.SpecifyKind(t, DateTimeKind.Utc) : null;
 
         var role = _currentUserService.Role;
         int? filterUserId = null;

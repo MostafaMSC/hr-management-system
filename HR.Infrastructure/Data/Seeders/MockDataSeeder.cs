@@ -37,8 +37,8 @@ public static class MockDataSeeder
         // 3. Seed Sections
         if (!await context.Sections.AnyAsync())
         {
-            var itDept = await context.Departments.FirstAsync(d => d.Name == "IT Department");
-            var hrDept = await context.Departments.FirstAsync(d => d.Name == "HR Department");
+            var itDept = await context.Departments.FirstOrDefaultAsync(d => d.Name == "IT Department") ?? await context.Departments.FirstAsync();
+            var hrDept = await context.Departments.FirstOrDefaultAsync(d => d.Name == "HR Department") ?? await context.Departments.FirstAsync();
             
             var frontendSection = new Section { Name = "Frontend Development", DepartmentId = itDept.Id, IsDeleted = false };
             var backendSection = new Section { Name = "Backend Development", DepartmentId = itDept.Id, IsDeleted = false };
@@ -60,8 +60,8 @@ public static class MockDataSeeder
         // 5. Seed Holidays
         if (!await context.Holidays.AnyAsync())
         {
-            var newYear = new Holiday { Name = "New Year", Date = new DateTime(DateTime.UtcNow.Year + 1, 1, 1), Description = "New Year Holiday" };
-            var nationalDay = new Holiday { Name = "National Day", Date = new DateTime(DateTime.UtcNow.Year, 10, 1), Description = "National Day Celebration" };
+            var newYear = new Holiday { Name = "New Year", Date = new DateTime(DateTime.UtcNow.Year + 1, 1, 1, 0, 0, 0, DateTimeKind.Utc), Description = "New Year Holiday" };
+            var nationalDay = new Holiday { Name = "National Day", Date = new DateTime(DateTime.UtcNow.Year, 10, 1, 0, 0, 0, DateTimeKind.Utc), Description = "National Day Celebration" };
             context.Holidays.AddRange(newYear, nationalDay);
             await context.SaveChangesAsync();
         }
@@ -70,17 +70,20 @@ public static class MockDataSeeder
         var userCount = await context.UserInfos.CountAsync();
         if (userCount < 100)
         {
-            var itDept = await context.Departments.FirstAsync(d => d.Name == "IT Department");
-            var hrDept = await context.Departments.FirstAsync(d => d.Name == "HR Department");
-            var salesDept = await context.Departments.FirstAsync(d => d.Name == "Sales Department");
+            var allDepts = await context.Departments.ToListAsync();
+            var itDept = allDepts.FirstOrDefault(d => d.Name == "IT Department") ?? allDepts.First();
+            var hrDept = allDepts.FirstOrDefault(d => d.Name == "HR Department") ?? allDepts.First();
+            var salesDept = allDepts.FirstOrDefault(d => d.Name == "Sales Department") ?? allDepts.First();
             
-            var frontendSection = await context.Sections.FirstAsync(s => s.Name == "Frontend Development");
-            var backendSection = await context.Sections.FirstAsync(s => s.Name == "Backend Development");
-            var recruitmentSection = await context.Sections.FirstAsync(s => s.Name == "Recruitment");
-            var payrollSection = await context.Sections.FirstAsync(s => s.Name == "Payroll");
+            var allSections = await context.Sections.ToListAsync();
+            var frontendSection = allSections.FirstOrDefault(s => s.Name == "Frontend Development") ?? allSections.FirstOrDefault();
+            var backendSection = allSections.FirstOrDefault(s => s.Name == "Backend Development") ?? allSections.FirstOrDefault();
+            var recruitmentSection = allSections.FirstOrDefault(s => s.Name == "Recruitment") ?? allSections.FirstOrDefault();
+            var payrollSection = allSections.FirstOrDefault(s => s.Name == "Payroll") ?? allSections.FirstOrDefault();
 
-            var standardShift = await context.AttendanceShifts.FirstAsync(s => s.Name == "Standard Shift");
-            var nightShift = await context.AttendanceShifts.FirstAsync(s => s.Name == "Night Shift");
+            var allShifts = await context.AttendanceShifts.ToListAsync();
+            var standardShift = allShifts.FirstOrDefault(s => s.Name == "Standard Shift") ?? allShifts.First();
+            var nightShift = allShifts.FirstOrDefault(s => s.Name == "Night Shift") ?? allShifts.First();
 
             if (userCount == 0)
             {

@@ -61,9 +61,11 @@ namespace HR.WebApi.Controllers
         /// Retrieves paginated attendance logs from the database.
         /// </summary>
         [HttpGet("logs")]
-        public async Task<IActionResult> GetLogs([FromQuery] int page = 1, [FromQuery] int pageSize = 100, [FromQuery] string deviceIp = null)
+        public async Task<IActionResult> GetLogs([FromQuery] int page = 1, [FromQuery] int pageSize = 100, [FromQuery] string deviceIp = null, [FromQuery] DateTime? startDate = null, [FromQuery] DateTime? endDate = null, [FromQuery] string employeeId = null)
         {
-            var result = await _mediator.Send(new GetLogsQuery(page, pageSize, deviceIp));
+            var utcStart = startDate.HasValue ? DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc) : (DateTime?)null;
+            var utcEnd = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : (DateTime?)null;
+            var result = await _mediator.Send(new GetLogsQuery(page, pageSize, deviceIp, utcStart, utcEnd, employeeId));
             return Ok(new { success = true, total = result.Total, page = result.Page, pageSize = result.PageSize, count = result.Data.Count, data = result.Data });
         }
 

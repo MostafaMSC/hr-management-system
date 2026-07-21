@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using HR.Domain.Entities;
@@ -12,7 +12,7 @@ public interface IAttendanceLogRepository
     Task<List<AttendanceLog>> GetLogsByUserIdAsync(string userId, string? deviceIp = null);
     Task<List<AttendanceLog>> GetTodayLogsAsync(string? deviceIp = null);
     Task<int> GetLogsCountAsync(string? deviceIp = null);
-    Task<(List<AttendanceLog> Data, int Total)> GetPagedLogsAsync(int page, int pageSize, string? deviceIp, int? userId = null, int? departmentId = null, CancellationToken cancellationToken = default);
+    Task<(List<AttendanceLog> Data, int Total)> GetPagedLogsAsync(int page, int pageSize, string? deviceIp, int? userId = null, int? departmentId = null, DateTime? startDate = null, DateTime? endDate = null, string? employeeId = null, CancellationToken cancellationToken = default);
     Task<List<AttendanceLog>> GetAllLogsAsync(string? deviceIp = null, int? userId = null, int? departmentId = null);
     IAsyncEnumerable<AttendanceLog> GetAllLogsStreamAsync(string? deviceIp = null, int? userId = null, int? departmentId = null, DateTime? dateFrom = null, DateTime? dateTo = null);
 

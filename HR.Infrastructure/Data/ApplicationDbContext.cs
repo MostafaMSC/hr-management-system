@@ -29,6 +29,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Fingerprint> Fingerprints => Set<Fingerprint>();
 
     public DbSet<BonusRequest> BonusRequests => Set<BonusRequest>();
+    public DbSet<DeviceSyncTask> DeviceSyncTasks => Set<DeviceSyncTask>();
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {

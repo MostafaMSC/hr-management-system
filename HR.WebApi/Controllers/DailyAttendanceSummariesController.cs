@@ -36,10 +36,11 @@ public class DailyAttendanceSummariesController : ControllerBase
         [FromQuery] int pageSize = 20,
         [FromQuery] string? sortBy = null,
         [FromQuery] string? sortDirection = "asc",
+        [FromQuery] string? search = null,
         CancellationToken cancellationToken = default)
     {
         var query = new GetDailyAttendanceSummariesQuery(
-            userId, dateFrom, dateTo, page, pageSize, sortBy, sortDirection);
+            userId, dateFrom, dateTo, page, pageSize, sortBy, sortDirection, search);
 
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
@@ -56,9 +57,10 @@ public class DailyAttendanceSummariesController : ControllerBase
         [FromQuery] int? userId,
         [FromQuery] DateTime? dateFrom,
         [FromQuery] DateTime? dateTo,
+        [FromQuery] string? search = null,
         CancellationToken cancellationToken = default)
     {
-        var query = new ExportDailyAttendanceSummariesQuery(userId, dateFrom, dateTo);
+        var query = new ExportDailyAttendanceSummariesQuery(userId, dateFrom, dateTo, search);
         var result = await _mediator.Send(query, cancellationToken);
 
         return File(result.Data, result.ContentType, result.FileName);

@@ -47,8 +47,8 @@ public class GetAttendanceReportQueryHandler : IRequestHandler<GetAttendanceRepo
         var page = request.Page <= 0 ? 1 : request.Page;
         var pageSize = request.PageSize <= 0 ? 20 : request.PageSize;
 
-        DateTime? dtFrom = DateTime.TryParse(request.DateFrom, out DateTime f) ? f : null;
-        DateTime? dtTo = DateTime.TryParse(request.DateTo, out DateTime t) ? t : null;
+        DateTime? dtFrom = DateTime.TryParse(request.DateFrom, out DateTime f) ? DateTime.SpecifyKind(f, DateTimeKind.Utc) : null;
+        DateTime? dtTo = DateTime.TryParse(request.DateTo, out DateTime t) ? DateTime.SpecifyKind(t, DateTimeKind.Utc) : null;
 
         var role = _currentUserService.Role;
         int? filterUserId = null;

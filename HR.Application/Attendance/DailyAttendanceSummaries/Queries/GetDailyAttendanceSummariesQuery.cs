@@ -12,7 +12,8 @@ public record GetDailyAttendanceSummariesQuery(
     int Page = 1,
     int PageSize = 20,
     string? SortBy = null,
-    string? SortDirection = "asc") : IRequest<GetDailyAttendanceSummariesResult>;
+    string? SortDirection = "asc",
+    string? Search = null) : IRequest<GetDailyAttendanceSummariesResult>;
 
 public class GetDailyAttendanceSummariesResult
 {
@@ -52,6 +53,15 @@ public class GetDailyAttendanceSummariesQueryHandler : IRequestHandler<GetDailyA
         if (request.DateTo.HasValue)
         {
             query = query.Where(s => s.Date <= request.DateTo.Value.Date);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var searchLower = request.Search.ToLower();
+            query = query.Where(s => 
+                (s.UserInfo != null && s.UserInfo.Username.ToLower().Contains(searchLower)) ||
+                (s.UserInfo != null && s.UserInfo.BiometricId != null && s.UserInfo.BiometricId.ToLower().Contains(searchLower))
+            );
         }
 
         var total = await query.CountAsync(cancellationToken);
