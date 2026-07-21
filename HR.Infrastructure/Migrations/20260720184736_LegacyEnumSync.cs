@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,14 +11,7 @@ namespace HR.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<int>(
-                name: "MaritalStatus",
-                table: "UserInfos",
-                type: "integer",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "text",
-                oldNullable: true);
+            // Removed AlterColumn for MaritalStatus because it is stored as text in DB
 
             migrationBuilder.UpdateData(
                 table: "AttendanceShifts",

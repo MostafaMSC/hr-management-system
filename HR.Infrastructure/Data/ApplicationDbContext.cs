@@ -96,7 +96,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             .HasForeignKey(u => u.SecondLineManagerId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Entity<UserInfo>().Property(u => u.Role).HasConversion<string>();
+        // Role is an integer in the database, do not convert to string
         builder.Entity<UserInfo>().Property(u => u.MaritalStatus).HasConversion<string>();
 
         // Configure UserDevice (Many-to-Many join table)
