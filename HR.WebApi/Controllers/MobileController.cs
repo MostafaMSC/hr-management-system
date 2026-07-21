@@ -151,12 +151,12 @@ public class MobileController : ControllerBase
     /// </summary>
     [HttpGet("department-users-summary")]
     [Authorize]
-    public async Task<IActionResult> GetDepartmentUsersSummary([FromQuery] int? month, [FromQuery] int? year)
+    public async Task<IActionResult> GetDepartmentUsersSummary([FromQuery] int? month, [FromQuery] int? year, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (int.TryParse(userIdStr, out int userId))
         {
-            return Ok(await _mediator.Send(new GetDepartmentUsersSummaryQuery(userId, month, year)));
+            return Ok(await _mediator.Send(new GetDepartmentUsersSummaryQuery(userId, month, year, page, pageSize)));
         }
         return Unauthorized();
     }
@@ -166,13 +166,13 @@ public class MobileController : ControllerBase
     /// </summary>
     [HttpGet("daily-logs")]
     [Authorize]
-    public async Task<IActionResult> GetDailyLogs([FromQuery] int? month, [FromQuery] int? year, [FromQuery] int? employeeId)
+    public async Task<IActionResult> GetDailyLogs([FromQuery] int? month, [FromQuery] int? year, [FromQuery] int? employeeId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (int.TryParse(userIdStr, out int currentUserId))
         {
             int targetUserId = employeeId ?? currentUserId;
-            return Ok(await _mediator.Send(new GetDailyLogsQuery(targetUserId, month, year)));
+            return Ok(await _mediator.Send(new GetDailyLogsQuery(targetUserId, month, year, page, pageSize)));
         }
         return Unauthorized();
     }
@@ -182,12 +182,12 @@ public class MobileController : ControllerBase
     /// </summary>
     [HttpGet("department-colleagues")]
     [Authorize]
-    public async Task<IActionResult> GetDepartmentColleagues()
+    public async Task<IActionResult> GetDepartmentColleagues([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (int.TryParse(userIdStr, out int userId))
         {
-            return Ok(await _mediator.Send(new GetDepartmentColleaguesQuery(userId)));
+            return Ok(await _mediator.Send(new GetDepartmentColleaguesQuery(userId, page, pageSize)));
         }
         return Unauthorized();
     }
@@ -197,9 +197,9 @@ public class MobileController : ControllerBase
     /// </summary>
     [HttpGet("devices")]
     [Authorize]
-    public async Task<IActionResult> GetDevices()
+    public async Task<IActionResult> GetDevices([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        return Ok(await _mediator.Send(new GetAllDevicesQuery()));
+        return Ok(await _mediator.Send(new GetAllDevicesQuery(page, pageSize)));
     }
 
     /// <summary>
@@ -207,12 +207,12 @@ public class MobileController : ControllerBase
     /// </summary>
     [HttpGet("notifications")]
     [Authorize]
-    public async Task<IActionResult> GetNotifications([FromQuery] bool unreadOnly = false, [FromQuery] int? pageNumber = null, [FromQuery] int? pageSize = null)
+    public async Task<IActionResult> GetNotifications([FromQuery] bool unreadOnly = false, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (int.TryParse(userIdStr, out int userId))
         {
-            return Ok(await _mediator.Send(new GetNotificationsQuery(userId, unreadOnly)));
+            return Ok(await _mediator.Send(new GetNotificationsQuery(userId, unreadOnly, page, pageSize)));
         }
         return Unauthorized();
     }
