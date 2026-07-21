@@ -96,6 +96,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             .HasForeignKey(u => u.SecondLineManagerId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Entity<UserInfo>().Property(u => u.Role).HasConversion<string>();
+        builder.Entity<UserInfo>().Property(u => u.MaritalStatus).HasConversion<string>();
+
         // Configure UserDevice (Many-to-Many join table)
         builder.Entity<UserDevice>()
             .HasOne(ud => ud.UserInfo)
