@@ -30,8 +30,8 @@ public class GetWorkHoursQueryHandler : IRequestHandler<GetWorkHoursQuery, List<
         if (!TimeSpan.TryParse(request.FinishTime, out TimeSpan finishTimeSpan))
             finishTimeSpan = new TimeSpan(16, 0, 0);
 
-        var today = DateTime.Today;
-        var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
+        var today = DateTime.UtcNow.Date;
+        var firstDayOfMonth = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
         // Fix: Week starts on Saturday (DayOfWeek 6) in MENA
         int daysSinceSaturday = ((int)today.DayOfWeek - (int)DayOfWeek.Saturday + 7) % 7;
@@ -55,7 +55,7 @@ public class GetWorkHoursQueryHandler : IRequestHandler<GetWorkHoursQuery, List<
         {
             var dailyGroups = logs.GroupBy(x => x.PunchTime.Date);
             double totalHours = 0;
-            var todayLocal = DateTime.Today;
+            var todayLocal = DateTime.UtcNow.Date;
 
             foreach (var dayGroup in dailyGroups)
             {
@@ -79,7 +79,7 @@ public class GetWorkHoursQueryHandler : IRequestHandler<GetWorkHoursQuery, List<
                     {
                         // No valid checkout yet, or just recently checked out (fallback to live)
                         var finishDateTime = todayLocal.Add(finishTimeSpan);
-                        var now = DateTime.Now;
+                        var now = DateTime.UtcNow;
                         var endTime = now > finishDateTime ? finishDateTime : now;
 
                         if (endTime > punchIn)
