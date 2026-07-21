@@ -78,13 +78,13 @@ namespace HR.WebApi.Controllers
         }
 
         /// <summary>
-        /// Retrieves all users from the database.
+        /// Retrieves paginated users from the database.
         /// </summary>
         [HttpGet("get-users")]
-        public async Task<IActionResult> GetUsers([FromQuery] string deviceIp = null)
+        public async Task<IActionResult> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 100, [FromQuery] string deviceIp = null)
         {
-            var users = await _mediator.Send(new GetUsersQuery(deviceIp));
-            return Ok(new { success = true, count = users.Count, users });
+            var result = await _mediator.Send(new GetUsersQuery(deviceIp, page, pageSize));
+            return Ok(new { success = true, total = result.Total, page = result.Page, pageSize = result.PageSize, count = result.Data.Count, data = result.Data });
         }
 
         /// <summary>
@@ -124,8 +124,8 @@ namespace HR.WebApi.Controllers
         [HttpGet("get-users-count")]
         public async Task<IActionResult> GetUsersCount([FromQuery] string deviceIp = null)
         {
-            var users = await _mediator.Send(new GetUsersQuery(deviceIp));
-            return Ok(new { success = true, count = users.Count });
+            var result = await _mediator.Send(new GetUsersQuery(deviceIp, 1, 1));
+            return Ok(new { success = true, count = result.Total });
         }
 
         /// <summary>
@@ -144,13 +144,7 @@ namespace HR.WebApi.Controllers
         [HttpGet("get-users-count-by-department")]
         public async Task<IActionResult> GetUsersCountByDepartment()
         {
-            var users = await _mediator.Send(new GetUsersQuery(null));
-            var grouped = users
-                .GroupBy(u => u.Department?.Name ?? "Unassigned")
-                .Select(g => new { department = g.Key, count = g.Count() })
-                .OrderByDescending(x => x.count)
-                .ToList();
-
+            var grouped = await _mediator.Send(new GetUsersCountByDepartmentQuery(null));
             return Ok(new { success = true, data = grouped });
         }
 

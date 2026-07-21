@@ -8,52 +8,67 @@ using MediatR;
 using HR.Domain.Entities;
 using HR.Application.Common.Interfaces;
 
+using HR.Application.Common.Models;
+using Microsoft.EntityFrameworkCore;
+
 namespace HR.Application.Attendance.ZKPython.Users.Queries;
 
-public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, List<UserInfo>>
+public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, PaginatedResult<UserInfo>>
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
 
     public GetUsersQueryHandler(
-        IUserRepository userRepository,
+        IApplicationDbContext context,
         ICurrentUserService currentUserService)
     {
-        _userRepository = userRepository;
+        _context = context;
         _currentUserService = currentUserService;
     }
 
-    public async Task<List<UserInfo>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResult<UserInfo>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
     {
         var role = _currentUserService.Role;
         var userId = _currentUserService.UserId;
         var deptId = _currentUserService.DepartmentId;
 
-        if (role == Domain.Enums.UserType.Administrator)
+        var query = _context.UserInfos.AsQueryable();
+
+        if (role == Domain.Enums.UserType.Manager && deptId.HasValue)
         {
-            return await _userRepository.GetUsersAsync(request.DeviceIp, cancellationToken);
+            query = query.Where(u => u.DepartmentId == deptId.Value);
         }
-        else if (role == Domain.Enums.UserType.Manager)
-        {
-            if (deptId.HasValue)
-            {
-                // Manager sees users in their department
-                // If requesting specific DeviceIp, we might need to filter further (or ignore DeviceIp filter for manager security view)
-                // Existing implementation has GetUsersAsync(deviceIp)
-                // We should likely prioritize Department filter.
-                return await _userRepository.GetUsersByDepartmentIdAsync(deptId.Value, cancellationToken);
-            }
-            // If no department assigned, maybe return empty or self?
-            return new List<UserInfo>();
-        }
-        else // User
+        else if (role != Domain.Enums.UserType.Administrator && role != Domain.Enums.UserType.Manager)
         {
             if (userId.HasValue)
             {
-                var user = await _userRepository.GetByIdAsync(userId.Value, cancellationToken);
-                return user != null ? new List<UserInfo> { user } : new List<UserInfo>();
+                query = query.Where(u => u.Id == userId.Value);
             }
-            return new List<UserInfo>();
+            else
+            {
+                return new PaginatedResult<UserInfo> { Page = request.Page, PageSize = request.PageSize };
+            }
         }
+
+        if (!string.IsNullOrEmpty(request.DeviceIp))
+        {
+            query = query.Where(u => u.DeviceIp == request.DeviceIp);
+        }
+
+        var total = await query.CountAsync(cancellationToken);
+        
+        var data = await query
+            .OrderByDescending(u => u.CreatedAt)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PaginatedResult<UserInfo>
+        {
+            Total = total,
+            Page = request.Page,
+            PageSize = request.PageSize,
+            Data = data
+        };
     }
 }

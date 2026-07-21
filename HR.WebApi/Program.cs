@@ -204,6 +204,11 @@ using (var scope = app.Services.CreateScope())
             }
             db.SaveChanges();
             Log.Information("✅ Default Admin user is ready. (Email: admin@admin.com, Pass: Admin123!)");
+            
+            // Mock Data Seeding for Testing
+            Log.Information("🌱 Seeding comprehensive mock data...");
+            await HR.Infrastructure.Data.Seeders.MockDataSeeder.SeedAsync(db, passwordHasher);
+            Log.Information("✅ Comprehensive mock data seeded successfully.");
         }
 
         // Auto-Repair (If Holiday logic is needed, add here. Skipping explicit repair for now since Holiday entity is not standard in HR template yet)
