@@ -67,7 +67,8 @@ public static class MockDataSeeder
         }
 
         // 6. Seed Users
-        if (!await context.UserInfos.AnyAsync())
+        var userCount = await context.UserInfos.CountAsync();
+        if (userCount < 100)
         {
             var itDept = await context.Departments.FirstAsync(d => d.Name == "IT Department");
             var hrDept = await context.Departments.FirstAsync(d => d.Name == "HR Department");
@@ -81,33 +82,43 @@ public static class MockDataSeeder
             var standardShift = await context.AttendanceShifts.FirstAsync(s => s.Name == "Standard Shift");
             var nightShift = await context.AttendanceShifts.FirstAsync(s => s.Name == "Night Shift");
 
-            var users = new List<UserInfo>();
-
-            var itManager = new UserInfo
+            if (userCount == 0)
             {
-                Username = "itmanager", Email = "itmanager@company.com", PasswordHash = passwordHasher.HashPassword("Password123!"),
-                FirstName = "IT", LastName = "Manager", Role = UserType.Manager, DepartmentId = itDept.Id, AttendanceShiftId = standardShift.Id,
-                DateOfJoining = DateTime.UtcNow.AddYears(-5), IsDeleted = false, AccountStatus = "Active"
-            };
-            var hrManager = new UserInfo
-            {
-                Username = "hrmanager", Email = "hrmanager@company.com", PasswordHash = passwordHasher.HashPassword("Password123!"),
-                FirstName = "HR", LastName = "Manager", Role = UserType.HR, DepartmentId = hrDept.Id, AttendanceShiftId = standardShift.Id,
-                DateOfJoining = DateTime.UtcNow.AddYears(-4), IsDeleted = false, AccountStatus = "Active"
-            };
-            users.AddRange(new[] { itManager, hrManager });
-            context.UserInfos.AddRange(users);
-            await context.SaveChangesAsync();
+                var users = new List<UserInfo>();
+                var itManager = new UserInfo
+                {
+                    Username = "itmanager", Email = "itmanager@company.com", PasswordHash = passwordHasher.HashPassword("Password123!"),
+                    FirstName = "IT", LastName = "Manager", Role = UserType.Manager, DepartmentId = itDept.Id, AttendanceShiftId = standardShift.Id,
+                    DateOfJoining = DateTime.UtcNow.AddYears(-5), IsDeleted = false, AccountStatus = "Active"
+                };
+                var hrManager = new UserInfo
+                {
+                    Username = "hrmanager", Email = "hrmanager@company.com", PasswordHash = passwordHasher.HashPassword("Password123!"),
+                    FirstName = "HR", LastName = "Manager", Role = UserType.HR, DepartmentId = hrDept.Id, AttendanceShiftId = standardShift.Id,
+                    DateOfJoining = DateTime.UtcNow.AddYears(-4), IsDeleted = false, AccountStatus = "Active"
+                };
+                users.AddRange(new[] { itManager, hrManager });
+                context.UserInfos.AddRange(users);
+                await context.SaveChangesAsync();
 
-            itDept.ManagerId = itManager.Id;
-            hrDept.ManagerId = hrManager.Id;
-            await context.SaveChangesAsync();
+                itDept.ManagerId = itManager.Id;
+                hrDept.ManagerId = hrManager.Id;
+                await context.SaveChangesAsync();
+                
+                userCount = 2;
+            }
 
-            var firstNames = new[] { "Ahmed", "Mohammed", "Fatima", "Ali", "Omar", "Sara", "Noor", "Hassan", "Zainab", "Yousef", "Aisha", "Khalid" };
-            var lastNames = new[] { "Al-Sayed", "Hassan", "Ali", "Mahmoud", "Abdullah", "Ibrahim", "Yassin", "Sami", "Farooq", "Mansour" };
+            var itManagerExisting = await context.UserInfos.FirstOrDefaultAsync(u => u.Username == "itmanager");
+            var hrManagerExisting = await context.UserInfos.FirstOrDefaultAsync(u => u.Username == "hrmanager");
+
+            var firstNames = new[] { "Ahmed", "Mohammed", "Fatima", "Ali", "Omar", "Sara", "Noor", "Hassan", "Zainab", "Yousef", "Aisha", "Khalid", "Tariq", "Huda", "Mona", "Layla" };
+            var lastNames = new[] { "Al-Sayed", "Hassan", "Ali", "Mahmoud", "Abdullah", "Ibrahim", "Yassin", "Sami", "Farooq", "Mansour", "Khalil", "Nasser" };
             var generatedUsers = new List<UserInfo>();
 
-            for (int i = 1; i <= 48; i++)
+            var maxEmpId = await context.UserInfos.Where(u => u.Username.StartsWith("emp")).CountAsync();
+            var neededUsers = 100 - userCount;
+
+            for (int i = maxEmpId + 1; i <= maxEmpId + neededUsers; i++)
             {
                 var dept = rand.Next(1, 4) switch { 1 => itDept, 2 => hrDept, _ => salesDept };
                 var isIt = dept.Id == itDept.Id;
@@ -115,7 +126,7 @@ public static class MockDataSeeder
                 int? sectionId = null;
                 if (isIt) sectionId = rand.Next(1, 3) == 1 ? frontendSection.Id : backendSection.Id;
                 if (isHr) sectionId = rand.Next(1, 3) == 1 ? recruitmentSection.Id : payrollSection.Id;
-                int? managerId = isIt ? itManager.Id : (isHr ? hrManager.Id : null);
+                int? managerId = isIt ? itManagerExisting?.Id : (isHr ? hrManagerExisting?.Id : null);
 
                 generatedUsers.Add(new UserInfo
                 {
@@ -134,13 +145,16 @@ public static class MockDataSeeder
         var allEmployees = await context.UserInfos.ToListAsync();
 
         // 7. Seed Attendance Logs
-        if (!await context.AttendanceLogs.AnyAsync() && allEmployees.Any())
+        var existingLogUserIds = await context.AttendanceLogs.Select(l => l.UserInfoId).Distinct().ToListAsync();
+        var usersWithoutLogs = allEmployees.Where(u => !existingLogUserIds.Contains(u.Id)).ToList();
+        
+        if (usersWithoutLogs.Any())
         {
             var logs = new List<AttendanceLog>();
             var endDate = DateTime.UtcNow.Date;
             var startDate = endDate.AddDays(-60); // 60 days of logs for more data
 
-            foreach (var emp in allEmployees)
+            foreach (var emp in usersWithoutLogs)
             {
                 for (var date = startDate; date <= endDate; date = date.AddDays(1))
                 {
@@ -231,10 +245,13 @@ public static class MockDataSeeder
         var dbBackDevice = await context.Devices.Skip(1).FirstOrDefaultAsync() ?? dbMainDevice;
 
         // 11. Seed UserDevices
-        if (!await context.UserDevices.AnyAsync() && allEmployees.Any() && await context.Devices.AnyAsync())
+        var existingDeviceUserIds = await context.UserDevices.Select(u => u.UserInfoId).Distinct().ToListAsync();
+        var usersWithoutDevices = allEmployees.Where(u => !existingDeviceUserIds.Contains(u.Id)).ToList();
+        
+        if (usersWithoutDevices.Any() && await context.Devices.AnyAsync())
         {
             var userDevices = new List<UserDevice>();
-            foreach (var emp in allEmployees)
+            foreach (var emp in usersWithoutDevices)
             {
                 userDevices.Add(new UserDevice { UserInfoId = emp.Id, DeviceId = dbMainDevice.Id, ZkEnrollNumber = emp.BiometricId ?? emp.Id.ToString(), CreatedAt = DateTime.UtcNow });
                 if (rand.Next(2) == 0 && dbBackDevice.Id != dbMainDevice.Id)
@@ -247,11 +264,14 @@ public static class MockDataSeeder
         }
 
         // 12. Seed LeaveBalances
-        if (!await context.LeaveBalances.AnyAsync() && allEmployees.Any())
+        var existingLeaveBalanceUserIds = await context.LeaveBalances.Select(l => l.UserInfoId).Distinct().ToListAsync();
+        var usersWithoutLeaveBalances = allEmployees.Where(u => !existingLeaveBalanceUserIds.Contains(u.Id)).ToList();
+        
+        if (usersWithoutLeaveBalances.Any())
         {
             var leaveBalances = new List<LeaveBalance>();
             var currentYear = DateTime.UtcNow.Year;
-            foreach (var emp in allEmployees)
+            foreach (var emp in usersWithoutLeaveBalances)
             {
                 leaveBalances.Add(new LeaveBalance { UserInfoId = emp.Id, Year = currentYear, LeaveType = "Annual", TotalAllowed = 21, Used = rand.Next(0, 10), CreatedAt = DateTime.UtcNow });
             }
@@ -283,10 +303,13 @@ public static class MockDataSeeder
         }
 
         // 14. Seed Fingerprints
-        if (!await context.Fingerprints.AnyAsync() && allEmployees.Any())
+        var existingFingerprintUserIds = await context.Fingerprints.Select(f => f.UserId).Distinct().ToListAsync();
+        var usersWithoutFingerprints = allEmployees.Where(u => !existingFingerprintUserIds.Contains(u.Id)).ToList();
+        
+        if (usersWithoutFingerprints.Any())
         {
             var fingerprints = new List<Fingerprint>();
-            foreach (var emp in allEmployees)
+            foreach (var emp in usersWithoutFingerprints)
             {
                 fingerprints.Add(new Fingerprint
                 {
