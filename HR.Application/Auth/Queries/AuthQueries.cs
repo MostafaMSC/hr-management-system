@@ -6,7 +6,7 @@ namespace HR.Application.Auth.Queries;
 
 // --- Queries ---
 public record GetMeQuery(int UserId) : IRequest<object>;
-public record GetUsersQuery() : IRequest<object>;
+public record GetUsersQuery(int Page = 1, int PageSize = 100) : IRequest<object>;
 public record Get2FAStatusQuery(int UserId) : IRequest<object>;
 public record GetEmployeeStatsQuery(DateTime? Date) : IRequest<object>;
 
@@ -57,16 +57,44 @@ public class AuthQueriesHandler :
 
     public async Task<object> Handle(GetUsersQuery request, CancellationToken cancellationToken)
     {
-        var users = await _context.UserInfos
+        var query = _context.UserInfos
             .Include(u => u.Department)
+            .Include(u => u.Section)
+            .AsQueryable();
+
+        var total = await query.CountAsync(cancellationToken);
+
+        var users = await query
+            .OrderByDescending(u => u.CreatedAt)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
             .ToListAsync(cancellationToken);
 
-        return users.Select(u => new
+        return new
         {
-            id = u.Id,
-            username = u.Username,
-            department = u.Department == null ? null : new { name = u.Department.Name }
-        });
+            success = true,
+            total = total,
+            page = request.Page,
+            pageSize = request.PageSize,
+            count = users.Count,
+            data = users.Select(u => new
+            {
+                id = u.Id,
+                username = u.Username,
+                firstName = u.FirstName,
+                lastName = u.LastName,
+                email = u.Email,
+                role = u.Role.ToString(),
+                department = u.Department == null ? null : new { id = u.Department.Id, name = u.Department.Name },
+                section = u.Section == null ? null : new { id = u.Section.Id, name = u.Section.Name },
+                accountStatus = u.AccountStatus,
+                phoneNumber = u.PhoneNumber,
+                photo = u.ProfilePictureUrl,
+                biometricId = u.BiometricId,
+                hireDate = u.DateOfJoining,
+                is2FAEnabled = u.Is2FAEnabled
+            })
+        };
     }
 
     public async Task<object> Handle(Get2FAStatusQuery request, CancellationToken cancellationToken)

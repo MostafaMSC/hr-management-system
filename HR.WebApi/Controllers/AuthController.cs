@@ -227,9 +227,9 @@ public class AuthController : ControllerBase
     /// </summary>
     [Authorize]
     [HttpGet("users")]
-    public async Task<IActionResult> GetAllUsers(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        return Ok(await _mediator.Send(new GetUsersQuery(), cancellationToken));
+        return Ok(await _mediator.Send(new GetUsersQuery(page, pageSize), cancellationToken: default));
     }
 
     /// <summary>

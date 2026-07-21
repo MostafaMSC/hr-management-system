@@ -254,7 +254,6 @@ public static class MockDataSeeder
             foreach (var emp in allEmployees)
             {
                 leaveBalances.Add(new LeaveBalance { UserInfoId = emp.Id, Year = currentYear, LeaveType = "Annual", TotalAllowed = 21, Used = rand.Next(0, 10), CreatedAt = DateTime.UtcNow });
-                leaveBalances.Add(new LeaveBalance { UserInfoId = emp.Id, Year = currentYear, LeaveType = "Sick", TotalAllowed = 15, Used = rand.Next(0, 5), CreatedAt = DateTime.UtcNow });
             }
             context.LeaveBalances.AddRange(leaveBalances);
             await context.SaveChangesAsync();
